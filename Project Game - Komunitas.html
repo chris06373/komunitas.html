@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Labirin Komunitas — Tumbuh Bersama</title>
+  <style>
+    :root {
+      --bg: #f0fdf4;
+      --card: #ffffff;
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #f59e0b;
+      --danger: #ef4444;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ecfdf5 0%, #e0f2fe 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    header {
+      background: linear-gradient(120deg, #059669, #10b981);
+      color: white;
+      padding: 18px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.22);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .screen {
+      display: none;
+      padding: 24px 28px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SETUP SCREEN */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .setup-grid { grid-template-columns: 1fr; }
+    }
+
+    .preview-box {
+      background: #f8fafc;
+      border: 2px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 290px;
+    }
+
+    .avatar-stage {
+      width: 130px;
+      height: 130px;
+      animation: float 2.6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    .option-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 8px 13px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: white;
+      cursor: pointer;
+      font-size: 0.86rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      border-color: var(--primary);
+    }
+
+    .chip.selected {
+      border-color: var(--primary);
+      background: #ecfdf5;
+      color: var(--primary-dark);
+    }
+
+    .color-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: transform 0.2s;
+    }
+
+    .color-dot.selected {
+      border-color: #0f172a;
+      transform: scale(1.15);
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .level-grid { grid-template-columns: 1fr; }
+    }
+
+    .level-card {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .level-card:hover {
+      border-color: var(--primary);
+    }
+
+    .level-card.selected {
+      border-color: var(--primary);
+      background: #ecfdf5;
+    }
+
+    .level-card h4 {
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+
+    .level-card p {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 6px;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    /* GAMEPLAY SCREEN */
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .hud { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .stat-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stat-val {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 780px) {
+      .game-layout { grid-template-columns: 1fr; }
+    }
+
+    /* MAZE BOARD */
+    .maze-wrapper {
+      background: #1e293b;
+      padding: 12px;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .maze-grid {
+      display: grid;
+      gap: 3px;
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 1 / 1;
+    }
+
+    .cell {
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: 1.15rem;
+      transition: transform 0.15s ease, background 0.2s;
+      user-select: none;
+    }
+
+    .cell.wall {
+      background: #334155;
+      box-shadow: inset 0 -2px 0 #1e293b;
+    }
+
+    .cell.path {
+      background: #f1f5f9;
+    }
+
+    .cell.exit-locked {
+      background: #e2e8f0;
+      opacity: 0.7;
+    }
+
+    .cell.exit-open {
+      background: #fef08a;
+      animation: glowExit 1s infinite alternate;
+    }
+
+    @keyframes glowExit {
+      from { box-shadow: 0 0 4px #facc15; transform: scale(0.96); }
+      to { box-shadow: 0 0 14px #eab308; transform: scale(1.03); }
+    }
+
+    .item-bounce {
+      animation: bounceItem 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes bounceItem {
+      from { transform: translateY(0) scale(0.95); }
+      to { transform: translateY(-3px) scale(1.08); }
+    }
+
+    .trap-pulse {
+      animation: pulseTrap 0.9s infinite alternate;
+    }
+
+    @keyframes pulseTrap {
+      from { transform: scale(0.9); filter: brightness(0.95); }
+      to { transform: scale(1.08); filter: brightness(1.15); }
+    }
+
+    .player-token {
+      width: 86%;
+      height: 86%;
+      z-index: 5;
+      animation: playerPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes playerPop {
+      0% { transform: scale(0.65); }
+      100% { transform: scale(1); }
+    }
+
+    /* RIGHT PANEL: COMMUNITY SQUAD + CONTROLS */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .squad-box {
+      background: linear-gradient(180deg, #e0f2fe 0%, #dcfce7 100%);
+      border: 2px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 155px;
+    }
+
+    .squad-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .squad-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .squad-member {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 8px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      animation: joinAnim 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes joinAnim {
+      0% { transform: scale(0) rotate(-12deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    .squad-member span {
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    /* LEGEND */
+    .legend-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 0.8rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* D-PAD CONTROLS */
+    .dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 54px);
+      grid-template-rows: repeat(2, 48px);
+      gap: 6px;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .dpad button {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.12s;
+      box-shadow: 0 3px 0 #cbd5e1;
+    }
+
+    .dpad button:active {
+      transform: translateY(3px);
+      box-shadow: none;
+    }
+
+    .dpad .up { grid-column: 2; grid-row: 1; }
+    .dpad .left { grid-column: 1; grid-row: 2; }
+    .dpad .down { grid-column: 2; grid-row: 2; }
+    .dpad .right { grid-column: 3; grid-row: 2; }
+
+    /* FLOATING POPUP */
+    .toast-pop {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.92);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      z-index: 30;
+      pointer-events: none;
+      animation: toastAnim 1.4s ease forwards;
+      white-space: nowrap;
+    }
+
+    @keyframes toastAnim {
+      0% { opacity: 0; transform: translate(-50%, 10px); }
+      15% { opacity: 1; transform: translate(-50%, 0); }
+      85% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -12px); }
+    }
+
+    .shake-board {
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .log-box {
+      margin-top: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.84rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* RESULT SCREEN */
+    .result-box {
+      text-align: center;
+      padding: 28px 16px;
+    }
+
+    .result-emoji {
+      font-size: 4rem;
+      margin-bottom: 12px;
+      animation: joinAnim 0.6s ease;
+    }
+
+    .result-box h2 {
+      font-size: 1.75rem;
+      margin-bottom: 8px;
+    }
+
+    .result-box p {
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 22px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🧭 Labirin Komunitas</h1>
+      <span class="badge" id="headerBadge">Kustom Karakter & Pilih Level</span>
+    </header>
+
+    <!-- SCREEN 1: CHARACTER CREATOR -->
+    <div class="screen active" id="setupScreen">
+      <div class="setup-grid">
+        <div class="preview-box">
+          <div class="avatar-stage" id="avatarPreview"></div>
+          <h3 id="previewName" style="margin-top: 12px;">Nara</h3>
+          <span id="previewRole" style="font-size: 0.84rem; color: var(--muted); margin-top: 4px;">Pemimpin Komunitas</span>
+        </div>
+
+        <div>
+          <div class="form-group">
+            <label>1. Nama Karakter Kamu</label>
+            <input type="text" id="charNameInput" placeholder="Nama panggilan..." maxlength="14" value="Nara" />
+          </div>
+
+          <div class="form-group">
+            <label>2. Warna Baju</label>
+            <div class="option-row" id="colorOptions"></div>
+          </div>
+
+          <div class="form-group">
+            <label>3. Gaya Rambut & Aksesori</label>
+            <div class="option-row" id="styleOptions"></div>
+          </div>
+
+          <div class="form-group">
+            <label>4. Keahlian Karakter</label>
+            <div class="option-row" id="roleOptions"></div>
+          </div>
+
+          <div class="form-group">
+            <label>5. Pilih Tingkat Kesulitan Labirin</label>
+            <div class="level-grid" id="levelOptions"></div>
+          </div>
+
+          <button class="btn-primary" id="startBtn">Masuk ke Labirin 🚀</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: MAZE GAMEPLAY -->
+    <div class="screen" id="gameScreen">
+      <div class="hud">
+        <div class="stat-card">
+          <div class="stat-label">👥 Anggota Terkumpul</div>
+          <div class="stat-val" id="statMembers">1 / 4</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">❤️ Energi Tim</div>
+          <div class="stat-val" id="statEnergy">100%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">🎁 Hadiah & Poin</div>
+          <div class="stat-val" id="statScore">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">👣 Sisa Langkah</div>
+          <div class="stat-val" id="statSteps">45</div>
+        </div>
+      </div>
+
+      <div class="game-layout">
+        <!-- MAZE AREA -->
+        <div class="maze-wrapper" id="mazeWrapper">
+          <div class="maze-grid" id="mazeGrid"></div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="side-panel">
+          <div class="squad-box">
+            <div class="squad-title">
+              <span>🌱 Barisan Komunitas</span>
+              <span id="doorStatus" style="color: #d97706;">🔒 Pintu Terkunci</span>
+            </div>
+            <div class="squad-list" id="squadList"></div>
+          </div>
+
+          <div class="legend-box">
+            <div class="legend-item">🙋 <span>Calon Anggota Baru</span></div>
+            <div class="legend-item">🎁 <span>Hadiah (+Energi/Langkah)</span></div>
+            <div class="legend-item">🕳️ <span>Jebakan Konflik (-Energi)</span></div>
+            <div class="legend-item">🔥 <span>Rintangan Rumor (-Langkah)</span></div>
+            <div class="legend-item">🚪 <span>Pintu Markas (Finish)</span></div>
+            <div class="legend-item">⌨️ <span>Gunakan Arrow / WASD</span></div>
+          </div>
+
+          <div class="dpad">
+            <button class="up" onclick="movePlayer(0, -1)">⬆️</button>
+            <button class="left" onclick="movePlayer(-1, 0)">⬅️</button>
+            <button class="down" onclick="movePlayer(0, 1)">⬇️</button>
+            <button class="right" onclick="movePlayer(1, 0)">➡️</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="log-box">
+        <span id="logText">Jelajahi labirin, ajak semua calon anggota, lalu menuju pintu markas!</span>
+        <button class="chip" onclick="resetToSetup()" style="padding: 5px 12px; font-size: 0.78rem;">Ganti Karakter / Level</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: RESULT -->
+    <div class="screen" id="resultScreen">
+      <div class="result-box">
+        <div class="result-emoji" id="resultEmoji">🏆</div>
+        <h2 id="resultTitle">Komunitas Berhasil Dibentuk!</h2>
+        <p id="resultDesc"></p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-primary" style="max-width: 210px;" id="nextLevelBtn">Lanjut Level Berikutnya ➡️</button>
+          <button class="chip" style="padding: 12px 20px;" onclick="resetToSetup()">Kembali ke Awal 🔄</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- KONFIGURASI KARAKTER & LEVEL ---
+    const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
+    const STYLES = [
+      { id: 'short', label: 'Pendek Rapi' },
+      { id: 'curly', label: 'Keriting' },
+      { id: 'cap', label: 'Topi' },
+      { id: 'glasses', label: 'Kacamata' }
+    ];
+    const ROLES = [
+      { id: 'scout', label: '🧭 Penjelajah', desc: '+8 Langkah awal' },
+      { id: 'shield', label: '🛡️ Pendamai', desc: 'Kebal 50% jebakan' },
+      { id: 'cheer', label: '✨ Penyemangat', desc: 'Hadiah +2x lipat' }
+    ];
+
+    const NPC_POOL = [
+      { name: 'Budi', color: '#3b82f6', style: 'short' },
+      { name: 'Siti', color: '#ec4899', style: 'glasses' },
+      { name: 'Raka', color: '#f59e0b', style: 'cap' },
+      { name: 'Ayu', color: '#8b5cf6', style: 'curly' },
+      { name: 'Dina', color: '#14b8a6', style: 'short' },
+      { name: 'Fajar', color: '#ef4444', style: 'glasses' },
+      { name: 'Lia', color: '#eab308', style: 'curly' }
+    ];
+
+    // 1 = Tembok, 0 = Jalan, S = Start, E = Exit
+    const LEVELS = [
+      {
+        id: 'easy',
+        name: '🌱 Mudah',
+        desc: 'Labirin 9x9 sederhana. Ajak 3 anggota baru & hindari 2 jebakan.',
+        steps: 42,
+        membersToRescue: 3,
+        gifts: 3,
+        traps: 2,
+        map: [
+          [1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,1,0,0,0,1],
+          [1,0,1,0,1,0,1,0,1],
+          [1,0,1,0,0,0,1,0,1],
+          [1,0,1,1,1,0,1,0,1],
+          [1,0,0,0,0,0,0,0,1],
+          [1,1,1,0,1,1,1,0,1],
+          [1,0,0,0,0,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1]
+        ],
+        start: { x: 1, y: 1 },
+        exit: { x: 7, y: 7 }
+      },
+      {
+        id: 'medium',
+        name: '🔥 Agak Sulit',
+        desc: 'Labirin 11x11 bercabang. Ajak 4 anggota baru & waspadai 5 jebakan!',
+        steps: 58,
+        membersToRescue: 4,
+        gifts: 4,
+        traps: 5,
+        map: [
+          [1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,1,0,0,0,0,0,1],
+          [1,0,1,0,1,0,1,1,1,0,1],
+          [1,0,1,0,0,0,0,0,1,0,1],
+          [1,0,1,1,1,1,1,0,1,0,1],
+          [1,0,0,0,0,0,1,0,0,0,1],
+          [1,1,1,0,1,0,1,1,1,0,1],
+          [1,0,0,0,1,0,0,0,0,0,1],
+          [1,0,1,1,1,1,1,0,1,1,1],
+          [1,0,0,0,0,0,0,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        start: { x: 1, y: 1 },
+        exit: { x: 9, y: 9 }
+      },
+      {
+        id: 'hard',
+        name: '⚡ Sulit',
+        desc: 'Labirin 13x13 berliku! Kumpulkan 5 anggota baru di tengah banyak jebakan.',
+        steps: 72,
+        membersToRescue: 5,
+        gifts: 5,
+        traps: 8,
+        map: [
+          [1,1,1,1,1,1,1,1,1,1,1,1,1],
+          [1,0,0,0,1,0,0,0,1,0,0,0,1],
+          [1,0,1,0,1,0,1,0,1,0,1,0,1],
+          [1,0,1,0,0,0,1,0,0,0,1,0,1],
+          [1,0,1,1,1,0,1,1,1,0,1,0,1],
+          [1,0,0,0,1,0,0,0,0,0,0,0,1],
+          [1,1,1,0,1,1,1,0,1,1,1,0,1],
+          [1,0,0,0,0,0,1,0,1,0,0,0,1],
+          [1,0,1,1,1,0,1,0,1,0,1,1,1],
+          [1,0,1,0,0,0,0,0,0,0,0,0,1],
+          [1,0,1,0,1,1,1,1,1,1,1,0,1],
+          [1,0,0,0,0,0,0,0,0,0,0,0,1],
+          [1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ],
+        start: { x: 1, y: 1 },
+        exit: { x: 11, y: 11 }
+      }
+    ];
+
+    // --- STATE ---
+    let player = {
+      name: 'Nara',
+      color: COLORS[0],
+      style: 'short',
+      role: 'scout'
+    };
+
+    let selectedLevelIndex = 0;
+    let game = {};
+
+    // --- AVATAR SVG ---
+    function createAvatarSVG(color, style, isLeader = false) {
+      let accessory = '';
+      if (style === 'curly') {
+        accessory = `
+          <circle cx="32" cy="24" r="9" fill="#1e293b"/>
+          <circle cx="50" cy="20" r="10" fill="#1e293b"/>
+          <circle cx="68" cy="24" r="9" fill="#1e293b"/>
+        `;
+      } else if (style === 'cap') {
+        accessory = `
+          <path d="M30 28 Q50 10 70 28 Z" fill="#f59e0b"/>
+          <rect x="48" y="24" width="28" height="5" rx="2.5" fill="#d97706"/>
+        `;
+      } else if (style === 'glasses') {
+        accessory = `
+          <path d="M32 26 Q50 14 68 26 Z" fill="#1e293b"/>
+          <circle cx="42" cy="38" r="6" fill="none" stroke="#0f172a" stroke-width="2.5"/>
+          <circle cx="58" cy="38" r="6" fill="none" stroke="#0f172a" stroke-width="2.5"/>
+          <line x1="48" y1="38" x2="52" y2="38" stroke="#0f172a" stroke-width="2.5"/>
+        `;
+      } else {
+        accessory = `<path d="M31 28 Q50 12 69 28 Z" fill="#1e293b"/>`;
+      }
+
+      const crown = isLeader ? `<polygon points="42,12 46,5 50,11 54,5 58,12" fill="#facc15" stroke="#ca8a04" stroke-width="1"/>` : '';
+
+      return `
+        <svg viewBox="0 0 100 110" width="100%" height="100%">
+          <path d="M26 95 C26 68, 74 68, 74 95 Z" fill="${color}" />
+          <circle cx="50" cy="38" r="19" fill="#fde68a" />
+          <circle cx="43" cy="38" r="2.3" fill="#1e293b" />
+          <circle cx="57" cy="38" r="2.3" fill="#1e293b" />
+          <path d="M44 45 Q50 51 56 45" fill="none" stroke="#1e293b" stroke-width="2.3" stroke-linecap="round"/>
+          ${accessory}
+          ${crown}
+        </svg>
+      `;
+    }
+
+    // --- INIT SETUP UI ---
+    function initSetupUI() {
+      const colorContainer = document.getElementById('colorOptions');
+      COLORS.forEach(c => {
+        const dot = document.createElement('div');
+        dot.className = 'color-dot' + (c === player.color ? ' selected' : '');
+        dot.style.background = c;
+        dot.onclick = () => {
+          player.color = c;
+          document.querySelectorAll('.color-dot').forEach(el => el.classList.remove('selected'));
+          dot.classList.add('selected');
+          renderPreview();
+        };
+        colorContainer.appendChild(dot);
+      });
+
+      const styleContainer = document.getElementById('styleOptions');
+      STYLES.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'chip' + (s.id === player.style ? ' selected' : '');
+        btn.textContent = s.label;
+        btn.onclick = () => {
+          player.style = s.id;
+          styleContainer.querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
+          btn.classList.add('selected');
+          renderPreview();
+        };
+        styleContainer.appendChild(btn);
+      });
+
+      const roleContainer = document.getElementById('roleOptions');
+      ROLES.forEach(r => {
+        const btn = document.createElement('button');
+        btn.className = 'chip' + (r.id === player.role ? ' selected' : '');
+        btn.innerHTML = `${r.label} <small style="font-weight:400;color:#64748b">(${r.desc})</small>`;
+        btn.onclick = () => {
+          player.role = r.id;
+          roleContainer.querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
+          btn.classList.add('selected');
+          renderPreview();
+        };
+        roleContainer.appendChild(btn);
+      });
+
+      const levelContainer = document.getElementById('levelOptions');
+      LEVELS.forEach((lvl, idx) => {
+        const card = document.createElement('div');
+        card.className = 'level-card' + (idx === selectedLevelIndex ? ' selected' : '');
+        card.innerHTML = `<h4>${lvl.name}</h4><p>${lvl.desc}</p>`;
+        card.onclick = () => {
+          selectedLevelIndex = idx;
+          levelContainer.querySelectorAll('.level-card').forEach(el => el.classList.remove('selected'));
+          card.classList.add('selected');
+        };
+        levelContainer.appendChild(card);
+      });
+
+      document.getElementById('charNameInput').addEventListener('input', (e) => {
+        player.name = e.target.value.trim() || 'Pemimpin';
+        renderPreview();
+      });
+
+      document.getElementById('startBtn').onclick = () => startLevel(selectedLevelIndex);
+      renderPreview();
+    }
+
+    function renderPreview() {
+      document.getElementById('avatarPreview').innerHTML = createAvatarSVG(player.color, player.style, true);
+      document.getElementById('previewName').textContent = player.name;
+      const roleObj = ROLES.find(r => r.id === player.role);
+      document.getElementById('previewRole').textContent = `${roleObj.label} • ${roleObj.desc}`;
+    }
+
+    function switchScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // --- START MAZE LEVEL ---
+    function startLevel(lvlIdx) {
+      selectedLevelIndex = lvlIdx;
+      const lvl = LEVELS[lvlIdx];
+      const size = lvl.map.length;
+
+      // Kumpulkan semua sel jalan kosong (bukan start & bukan exit)
+      let openCells = [];
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (lvl.map[y][x] === 0 && !(x === lvl.start.x && y === lvl.start.y) && !(x === lvl.exit.x && y === lvl.exit.y)) {
+            openCells.push({ x, y });
+          }
+        }
+      }
+      // Acak posisi item
+      openCells.sort(() => Math.random() - 0.5);
+
+      let items = {}; // key: "x,y"
+      let cursor = 0;
+
+      // Tempatkan Calon Anggota Baru
+      for (let i = 0; i < lvl.membersToRescue; i++) {
+        const cell = openCells[cursor++];
+        const npc = NPC_POOL[(i + lvlIdx) % NPC_POOL.length];
+        items[`${cell.x},${cell.y}`] = { type: 'member', npc };
+      }
+
+      // Tempatkan Hadiah
+      for (let i = 0; i < lvl.gifts; i++) {
+        const cell = openCells[cursor++];
+        items[`${cell.x},${cell.y}`] = {
+          type: 'gift',
+          subtype: i % 2 === 0 ? 'energy' : 'steps'
+        };
+      }
+
+      // Tempatkan Jebakan
+      for (let i = 0; i < lvl.traps; i++) {
+        const cell = openCells[cursor++];
+        items[`${cell.x},${cell.y}`] = {
+          type: 'trap',
+          subtype: i % 2 === 0 ? 'conflict' : 'rumor'
+        };
+      }
+
+      game = {
+        level: lvl,
+        px: lvl.start.x,
+        py: lvl.start.y,
+        energy: 100,
+        steps: lvl.steps + (player.role === 'scout' ? 8 : 0),
+        score: 0,
+        items,
+        squad: [{ name: player.name, color: player.color, style: player.style, isLeader: true }],
+        targetSquadSize: lvl.membersToRescue + 1,
+        over: false
+      };
+
+      document.getElementById('headerBadge').textContent = `${lvl.name} • Kumpulkan ${lvl.membersToRescue} Anggota`;
+      renderMaze();
+      renderSquad();
+      updateHUD();
+      switchScreen('gameScreen');
+    }
+
+    function renderMaze() {
+      const grid = document.getElementById('mazeGrid');
+      const map = game.level.map;
+      const size = map.length;
+      grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      grid.innerHTML = '';
+
+      const allRescued = game.squad.length >= game.targetSquadSize;
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const cell = document.createElement('div');
+          const isWall = map[y][x] === 1;
+          cell.className = 'cell ' + (isWall ? 'wall' : 'path');
+
+          if (x === game.level.exit.x && y === game.level.exit.y) {
+            cell.classList.add(allRescued ? 'exit-open' : 'exit-locked');
+            cell.innerHTML = allRescued ? '🚪' : '🔒';
+          }
+
+          const item = game.items[`${x},${y}`];
+          if (item && !(x === game.px && y === game.py)) {
+            if (item.type === 'member') {
+              cell.innerHTML = `<span class="item-bounce" title="${item.npc.name}">🙋</span>`;
+            } else if (item.type === 'gift') {
+              cell.innerHTML = `<span class="item-bounce">🎁</span>`;
+            } else if (item.type === 'trap') {
+              cell.innerHTML = item.subtype === 'conflict'
+                ? `<span class="trap-pulse">🕳️</span>`
+                : `<span class="trap-pulse">🔥</span>`;
+            }
+          }
+
+          if (x === game.px && y === game.py) {
+            cell.innerHTML = `<div class="player-token">${createAvatarSVG(player.color, player.style, true)}</div>`;
+          }
+
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    function renderSquad() {
+      const list = document.getElementById('squadList');
+      list.innerHTML = '';
+      game.squad.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'squad-member';
+        card.innerHTML = `
+          <div style="width: 38px; height: 42px;">${createAvatarSVG(m.color, m.style, m.isLeader)}</div>
+          <span>${m.isLeader ? '👑 ' : ''}${m.name}</span>
+        `;
+        list.appendChild(card);
+      });
+
+      const doorEl = document.getElementById('doorStatus');
+      if (game.squad.length >= game.targetSquadSize) {
+        doorEl.textContent = '🔓 Pintu Terbuka! Menuju 🚪';
+        doorEl.style.color = '#059669';
+      } else {
+        const sisa = game.targetSquadSize - game.squad.length;
+        doorEl.textContent = `🔒 Kurang ${sisa} Anggota`;
+        doorEl.style.color = '#d97706';
+      }
+    }
+
+    function showToast(text, bg = 'rgba(15, 23, 42, 0.92)') {
+      const wrap = document.getElementById('mazeWrapper');
+      const old = wrap.querySelector('.toast-pop');
+      if (old) old.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast-pop';
+      toast.style.background = bg;
+      toast.textContent = text;
+      wrap.appendChild(toast);
+      setTimeout(() => toast.remove(), 1400);
+    }
+
+    function triggerShake() {
+      const wrap = document.getElementById('mazeWrapper');
+      wrap.classList.remove('shake-board');
+      void wrap.offsetWidth;
+      wrap.classList.add('shake-board');
+    }
+
+    function movePlayer(dx, dy) {
+      if (game.over) return;
+
+      const nx = game.px + dx;
+      const ny = game.py + dy;
+      const map = game.level.map;
+
+      if (ny < 0 || ny >= map.length || nx < 0 || nx >= map.length || map[ny][nx] === 1) {
+        return; // Nabrak tembok
+      }
+
+      game.px = nx;
+      game.py = ny;
+      game.steps -= 1;
+
+      const key = `${nx},${ny}`;
+      const item = game.items[key];
+
+      if (item) {
+        if (item.type === 'member') {
+          game.squad.push({ ...item.npc, isLeader: false });
+          game.score += 100;
+          delete game.items[key];
+          showToast(`🎉 ${item.npc.name} bergabung ke komunitas!`, '#059669');
+          document.getElementById('logText').textContent = `Hore! ${item.npc.name} berhasil diajak bergabung (${game.squad.length}/${game.targetSquadSize}).`;
+          renderSquad();
+        } else if (item.type === 'gift') {
+          const mult = player.role === 'cheer' ? 2 : 1;
+          delete game.items[key];
+          if (item.subtype === 'energy') {
+            const heal = 20 * mult;
+            game.energy = Math.min(100, game.energy + heal);
+            game.score += 50 * mult;
+            showToast(`🎁 Hadiah Semangat! +${heal}% Energi`, '#2563eb');
+            document.getElementById('logText').textContent = `Menemukan kotak hadiah! Energi tim pulih +${heal}%.`;
+          } else {
+            const bonusSteps = 6 * mult;
+            game.steps += bonusSteps;
+            game.score += 50 * mult;
+            showToast(`🎁 Peta Pintas! +${bonusSteps} Langkah`, '#2563eb');
+            document.getElementById('logText').textContent = `Menemukan peta pintas! Mendapat tambahan +${bonusSteps} langkah.`;
+          }
+        } else if (item.type === 'trap') {
+          triggerShake();
+          delete game.items[key];
+          const resist = player.role === 'shield' ? 0.5 : 1;
+          if (item.subtype === 'conflict') {
+            const dmg = Math.round(30 * resist);
+            game.energy = Math.max(0, game.energy - dmg);
+            showToast(`🕳️ Jebakan Konflik! -${dmg}% Energi`, '#dc2626');
+            document.getElementById('logText').textContent = `Terkena jebakan konflik internal! Energi berkurang -${dmg}%.`;
+          } else {
+            const stepLoss = Math.max(2, Math.round(5 * resist));
+            game.steps = Math.max(0, game.steps - stepLoss);
+            showToast(`🔥 Rintangan Rumor! -${stepLoss} Langkah`, '#d97706');
+            document.getElementById('logText').textContent = `Terhambat rumor negatif! Kehilangan ${stepLoss} langkah.`;
+          }
+        }
+      }
+
+      renderMaze();
+      updateHUD();
+      checkOutcome();
+    }
+
+    function updateHUD() {
+      document.getElementById('statMembers').textContent = `${game.squad.length} / ${game.targetSquadSize}`;
+      document.getElementById('statEnergy').textContent = `${game.energy}%`;
+      document.getElementById('statScore').textContent = game.score;
+      document.getElementById('statSteps').textContent = game.steps;
+    }
+
+    function checkOutcome() {
+      const atExit = game.px === game.level.exit.x && game.py === game.level.exit.y;
+      const allRescued = game.squad.length >= game.targetSquadSize;
+
+      if (atExit && allRescued) {
+        game.over = true;
+        const finalScore = game.score + game.steps * 10 + game.energy;
+        showResult(
+          true,
+          '🏆 Komunitas Tumbuh & Kompak!',
+          `Selamat ${player.name}! Semua ${game.level.membersToRescue} anggota baru berhasil diajak keluar dari labirin ${game.level.name} dengan skor akhir ${finalScore}.`
+        );
+        return;
+      } else if (atExit && !allRescued) {
+        showToast('🔒 Pintu masih terkunci! Ajak semua anggota dulu.', '#d97706');
+      }
+
+      if (game.energy <= 0) {
+        game.over = true;
+        showResult(
+          false,
+          '💔 Energi Tim Habis',
+          `Terlalu banyak jebakan di labirin ${game.level.name}. Coba ambil hadiah 🎁 atau gunakan peran Pendamai!`
+        );
+      } else if (game.steps <= 0) {
+        game.over = true;
+        showResult(
+          false,
+          '⏳ Langkah Habis di Labirin',
+          `Kamu berhasil mengajak ${game.squad.length - 1} dari ${game.level.membersToRescue} anggota baru sebelum kehabisan langkah.`
+        );
+      }
+    }
+
+    function showResult(isWin, title, desc) {
+      document.getElementById('resultEmoji').textContent = isWin ? '🎉' : '🧭';
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultDesc').textContent = desc;
+
+      const nextBtn = document.getElementById('nextLevelBtn');
+      if (isWin && selectedLevelIndex < LEVELS.length - 1) {
+        nextBtn.style.display = 'inline-block';
+        nextBtn.textContent = `Lanjut ke ${LEVELS[selectedLevelIndex + 1].name} ➡️`;
+        nextBtn.onclick = () => startLevel(selectedLevelIndex + 1);
+      } else if (!isWin) {
+        nextBtn.style.display = 'inline-block';
+        nextBtn.textContent = 'Coba Level Ini Lagi 🔁';
+        nextBtn.onclick = () => startLevel(selectedLevelIndex);
+      } else {
+        nextBtn.style.display = 'none';
+      }
+
+      setTimeout(() => switchScreen('resultScreen'), 450);
+    }
+
+    function resetToSetup() {
+      game.over = true;
+      document.getElementById('headerBadge').textContent = 'Kustom Karakter & Pilih Level';
+      switchScreen('setupScreen');
+    }
+
+    // Keyboard Support (Arrow & WASD)
+    window.addEventListener('keydown', (e) => {
+      if (!document.getElementById('gameScreen').classList.contains('active')) return;
+      const key = e.key.toLowerCase();
+      if (key === 'arrowup' || key === 'w') { e.preventDefault(); movePlayer(0, -1); }
+      if (key === 'arrowdown' || key === 's') { e.preventDefault(); movePlayer(0, 1); }
+      if (key === 'arrowleft' || key === 'a') { e.preventDefault(); movePlayer(-1, 0); }
+      if (key === 'arrowright' || key === 'd') { e.preventDefault(); movePlayer(1, 0); }
+    });
+
+    initSetupUI();
+  </script>
+</body>
+</html>
