@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#059669" />
+  <meta name="description" content="Game Labirin Komunitas — kustom karakter, ajak anggota baru, dan tumbuh bersama." />
+  <link rel="manifest" href="./manifest.json" />
   <title>Labirin Komunitas — Tumbuh Bersama</title>
   <style>
     :root {
@@ -63,12 +66,42 @@
       gap: 10px;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .badge {
       background: rgba(255, 255, 255, 0.22);
       padding: 5px 14px;
       border-radius: 999px;
       font-size: 0.85rem;
       font-weight: 600;
+    }
+
+    .btn-install {
+      background: #fef08a;
+      color: #0f172a;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+      transition: transform 0.15s ease;
+    }
+
+    .btn-install.visible {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-install:hover {
+      transform: scale(1.04);
     }
 
     .screen {
@@ -120,6 +153,34 @@
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-8px); }
+    }
+
+    .highscores-box {
+      margin-top: 16px;
+      width: 100%;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.8rem;
+    }
+
+    .highscores-box h4 {
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+      font-size: 0.85rem;
+    }
+
+    .hs-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed #f1f5f9;
+    }
+
+    .hs-row:last-child {
+      border-bottom: none;
     }
 
     .form-group {
@@ -227,6 +288,29 @@
       line-height: 1.35;
     }
 
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-row strong {
+      font-size: 0.88rem;
+      display: block;
+    }
+
+    .toggle-row small {
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
     .btn-primary {
       width: 100%;
       padding: 13px;
@@ -318,8 +402,19 @@
       justify-content: center;
       position: relative;
       font-size: 1.15rem;
-      transition: transform 0.15s ease, background 0.2s;
+      transition: transform 0.15s ease, background 0.2s, opacity 0.25s;
       user-select: none;
+    }
+
+    .cell.fog {
+      opacity: 0.12;
+      filter: blur(1px);
+    }
+
+    .cell.radar-ping {
+      outline: 2.5px solid #38bdf8;
+      box-shadow: 0 0 12px #38bdf8;
+      z-index: 4;
     }
 
     .cell.wall {
@@ -376,7 +471,7 @@
       100% { transform: scale(1); }
     }
 
-    /* RIGHT PANEL: COMMUNITY SQUAD + CONTROLS */
+    /* RIGHT PANEL */
     .side-panel {
       display: flex;
       flex-direction: column;
@@ -429,7 +524,31 @@
       margin-top: 2px;
     }
 
-    /* LEGEND */
+    .skill-btn {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 2px solid #0284c7;
+      background: #f0f9ff;
+      color: #0369a1;
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .skill-btn:hover:not(:disabled) {
+      background: #e0f2fe;
+    }
+
+    .skill-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      border-color: var(--border);
+      color: var(--muted);
+      background: #f8fafc;
+    }
+
     .legend-box {
       background: #f8fafc;
       border: 1px solid var(--border);
@@ -545,9 +664,20 @@
 
     .result-box p {
       color: var(--muted);
-      max-width: 480px;
-      margin: 0 auto 22px;
+      max-width: 500px;
+      margin: 0 auto 14px;
       line-height: 1.5;
+    }
+
+    .record-pill {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-weight: 700;
+      font-size: 0.86rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -555,7 +685,10 @@
   <div class="app">
     <header>
       <h1>🧭 Labirin Komunitas</h1>
-      <span class="badge" id="headerBadge">Kustom Karakter & Pilih Level</span>
+      <div class="header-actions">
+        <button class="btn-install" id="installBtn">📲 Install Aplikasi</button>
+        <span class="badge" id="headerBadge">Kustom Karakter & Pilih Level</span>
+      </div>
     </header>
 
     <!-- SCREEN 1: CHARACTER CREATOR -->
@@ -565,6 +698,11 @@
           <div class="avatar-stage" id="avatarPreview"></div>
           <h3 id="previewName" style="margin-top: 12px;">Nara</h3>
           <span id="previewRole" style="font-size: 0.84rem; color: var(--muted); margin-top: 4px;">Pemimpin Komunitas</span>
+
+          <div class="highscores-box" id="highscoresBox">
+            <h4>🏅 Rekor Skor Terbaik</h4>
+            <div id="highscoresList"></div>
+          </div>
         </div>
 
         <div>
@@ -593,6 +731,14 @@
             <div class="level-grid" id="levelOptions"></div>
           </div>
 
+          <label class="toggle-row" for="fogToggle">
+            <div>
+              <strong>🌫️ Mode Kabut Misteri</strong>
+              <small>Sel yang belum dijelajahi tersamar kabut</small>
+            </div>
+            <input type="checkbox" id="fogToggle" style="width: 18px; height: 18px; accent-color: #059669;" />
+          </label>
+
           <button class="btn-primary" id="startBtn">Masuk ke Labirin 🚀</button>
         </div>
       </div>
@@ -620,12 +766,10 @@
       </div>
 
       <div class="game-layout">
-        <!-- MAZE AREA -->
         <div class="maze-wrapper" id="mazeWrapper">
           <div class="maze-grid" id="mazeGrid"></div>
         </div>
 
-        <!-- SIDEBAR -->
         <div class="side-panel">
           <div class="squad-box">
             <div class="squad-title">
@@ -634,6 +778,10 @@
             </div>
             <div class="squad-list" id="squadList"></div>
           </div>
+
+          <button class="skill-btn" id="skillBtn" onclick="useCommunitySkill()">
+            📡 Radar Komunitas & Dorongan (Siap)
+          </button>
 
           <div class="legend-box">
             <div class="legend-item">🙋 <span>Calon Anggota Baru</span></div>
@@ -665,6 +813,7 @@
         <div class="result-emoji" id="resultEmoji">🏆</div>
         <h2 id="resultTitle">Komunitas Berhasil Dibentuk!</h2>
         <p id="resultDesc"></p>
+        <div class="record-pill" id="recordPill">🏅 Rekor Terbaik Level: 0</div>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
           <button class="btn-primary" style="max-width: 210px;" id="nextLevelBtn">Lanjut Level Berikutnya ➡️</button>
           <button class="chip" style="padding: 12px 20px;" onclick="resetToSetup()">Kembali ke Awal 🔄</button>
@@ -674,7 +823,8 @@
   </div>
 
   <script>
-    // --- KONFIGURASI KARAKTER & LEVEL ---
+    const STORAGE_KEY = 'labirin_komunitas_save_v1';
+
     const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
     const STYLES = [
       { id: 'short', label: 'Pendek Rapi' },
@@ -698,7 +848,6 @@
       { name: 'Lia', color: '#eab308', style: 'curly' }
     ];
 
-    // 1 = Tembok, 0 = Jalan, S = Start, E = Exit
     const LEVELS = [
       {
         id: 'easy',
@@ -774,8 +923,29 @@
       }
     ];
 
-    // --- STATE ---
-    let player = {
+    function loadSavedData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { highscores: {}, player: null, fogMode: false };
+        return JSON.parse(raw);
+      } catch {
+        return { highscores: {}, player: null, fogMode: false };
+      }
+    }
+
+    function persistSave() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          highscores: saveData.highscores,
+          player,
+          fogMode: saveData.fogMode
+        }));
+      } catch {}
+    }
+
+    const saveData = loadSavedData();
+
+    let player = saveData.player || {
       name: 'Nara',
       color: COLORS[0],
       style: 'short',
@@ -784,8 +954,8 @@
 
     let selectedLevelIndex = 0;
     let game = {};
+    let deferredPrompt = null;
 
-    // --- AVATAR SVG ---
     function createAvatarSVG(color, style, isLeader = false) {
       let accessory = '';
       if (style === 'curly') {
@@ -825,8 +995,18 @@
       `;
     }
 
-    // --- INIT SETUP UI ---
+    function renderHighscores() {
+      const box = document.getElementById('highscoresList');
+      box.innerHTML = LEVELS.map(lvl => {
+        const best = saveData.highscores[lvl.id] || 0;
+        return `<div class="hs-row"><span>${lvl.name}</span><strong>${best} pts</strong></div>`;
+      }).join('');
+    }
+
     function initSetupUI() {
+      document.getElementById('charNameInput').value = player.name;
+      document.getElementById('fogToggle').checked = Boolean(saveData.fogMode);
+
       const colorContainer = document.getElementById('colorOptions');
       COLORS.forEach(c => {
         const dot = document.createElement('div');
@@ -837,6 +1017,7 @@
           document.querySelectorAll('.color-dot').forEach(el => el.classList.remove('selected'));
           dot.classList.add('selected');
           renderPreview();
+          persistSave();
         };
         colorContainer.appendChild(dot);
       });
@@ -851,6 +1032,7 @@
           styleContainer.querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
           btn.classList.add('selected');
           renderPreview();
+          persistSave();
         };
         styleContainer.appendChild(btn);
       });
@@ -865,6 +1047,7 @@
           roleContainer.querySelectorAll('.chip').forEach(el => el.classList.remove('selected'));
           btn.classList.add('selected');
           renderPreview();
+          persistSave();
         };
         roleContainer.appendChild(btn);
       });
@@ -885,10 +1068,17 @@
       document.getElementById('charNameInput').addEventListener('input', (e) => {
         player.name = e.target.value.trim() || 'Pemimpin';
         renderPreview();
+        persistSave();
+      });
+
+      document.getElementById('fogToggle').addEventListener('change', (e) => {
+        saveData.fogMode = e.target.checked;
+        persistSave();
       });
 
       document.getElementById('startBtn').onclick = () => startLevel(selectedLevelIndex);
       renderPreview();
+      renderHighscores();
     }
 
     function renderPreview() {
@@ -903,13 +1093,23 @@
       document.getElementById(id).classList.add('active');
     }
 
-    // --- START MAZE LEVEL ---
+    function revealAround(x, y, visitedSet, size) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
+            visitedSet.add(`${nx},${ny}`);
+          }
+        }
+      }
+    }
+
     function startLevel(lvlIdx) {
       selectedLevelIndex = lvlIdx;
       const lvl = LEVELS[lvlIdx];
       const size = lvl.map.length;
 
-      // Kumpulkan semua sel jalan kosong (bukan start & bukan exit)
       let openCells = [];
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
@@ -918,20 +1118,17 @@
           }
         }
       }
-      // Acak posisi item
       openCells.sort(() => Math.random() - 0.5);
 
-      let items = {}; // key: "x,y"
+      let items = {};
       let cursor = 0;
 
-      // Tempatkan Calon Anggota Baru
       for (let i = 0; i < lvl.membersToRescue; i++) {
         const cell = openCells[cursor++];
         const npc = NPC_POOL[(i + lvlIdx) % NPC_POOL.length];
         items[`${cell.x},${cell.y}`] = { type: 'member', npc };
       }
 
-      // Tempatkan Hadiah
       for (let i = 0; i < lvl.gifts; i++) {
         const cell = openCells[cursor++];
         items[`${cell.x},${cell.y}`] = {
@@ -940,7 +1137,6 @@
         };
       }
 
-      // Tempatkan Jebakan
       for (let i = 0; i < lvl.traps; i++) {
         const cell = openCells[cursor++];
         items[`${cell.x},${cell.y}`] = {
@@ -948,6 +1144,9 @@
           subtype: i % 2 === 0 ? 'conflict' : 'rumor'
         };
       }
+
+      const visited = new Set();
+      revealAround(lvl.start.x, lvl.start.y, visited, size);
 
       game = {
         level: lvl,
@@ -959,14 +1158,59 @@
         items,
         squad: [{ name: player.name, color: player.color, style: player.style, isLeader: true }],
         targetSquadSize: lvl.membersToRescue + 1,
+        fogMode: Boolean(saveData.fogMode),
+        visited,
+        skillCooldown: 0,
+        pingTargets: new Set(),
         over: false
       };
 
       document.getElementById('headerBadge').textContent = `${lvl.name} • Kumpulkan ${lvl.membersToRescue} Anggota`;
+      updateSkillButton();
       renderMaze();
       renderSquad();
       updateHUD();
       switchScreen('gameScreen');
+    }
+
+    function updateSkillButton() {
+      const btn = document.getElementById('skillBtn');
+      if (game.skillCooldown > 0) {
+        btn.disabled = true;
+        btn.textContent = `📡 Radar Komunitas (Cooldown ${game.skillCooldown} langkah)`;
+      } else {
+        btn.disabled = false;
+        btn.textContent = '📡 Radar Komunitas & Dorongan (Siap)';
+      }
+    }
+
+    function useCommunitySkill() {
+      if (game.over || game.skillCooldown > 0) return;
+
+      game.skillCooldown = 8;
+      game.steps += 3;
+      game.energy = Math.min(100, game.energy + 10);
+      game.pingTargets.clear();
+
+      const allRescued = game.squad.length >= game.targetSquadSize;
+      if (!allRescued) {
+        Object.entries(game.items).forEach(([key, val]) => {
+          if (val.type === 'member') {
+            game.pingTargets.add(key);
+            if (game.fogMode) game.visited.add(key);
+          }
+        });
+      } else {
+        const exitKey = `${game.level.exit.x},${game.level.exit.y}`;
+        game.pingTargets.add(exitKey);
+        if (game.fogMode) game.visited.add(exitKey);
+      }
+
+      showToast('📡 Radar aktif! +3 Langkah, +10% Energi & target tersorot', '#0284c7');
+      document.getElementById('logText').textContent = 'Radar Komunitas menyala! Target penting ditandai bingkai biru dan kamu mendapat +3 langkah.';
+      updateSkillButton();
+      renderMaze();
+      updateHUD();
     }
 
     function renderMaze() {
@@ -981,15 +1225,24 @@
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
           const cell = document.createElement('div');
+          const key = `${x},${y}`;
           const isWall = map[y][x] === 1;
           cell.className = 'cell ' + (isWall ? 'wall' : 'path');
+
+          if (game.fogMode && !game.visited.has(key)) {
+            cell.classList.add('fog');
+          }
+
+          if (game.pingTargets.has(key)) {
+            cell.classList.add('radar-ping');
+          }
 
           if (x === game.level.exit.x && y === game.level.exit.y) {
             cell.classList.add(allRescued ? 'exit-open' : 'exit-locked');
             cell.innerHTML = allRescued ? '🚪' : '🔒';
           }
 
-          const item = game.items[`${x},${y}`];
+          const item = game.items[key];
           if (item && !(x === game.px && y === game.py)) {
             if (item.type === 'member') {
               cell.innerHTML = `<span class="item-bounce" title="${item.npc.name}">🙋</span>`;
@@ -1063,14 +1316,22 @@
       const map = game.level.map;
 
       if (ny < 0 || ny >= map.length || nx < 0 || nx >= map.length || map[ny][nx] === 1) {
-        return; // Nabrak tembok
+        return;
       }
 
       game.px = nx;
       game.py = ny;
       game.steps -= 1;
 
+      if (game.skillCooldown > 0) {
+        game.skillCooldown -= 1;
+        updateSkillButton();
+      }
+
+      revealAround(nx, ny, game.visited, map.length);
+
       const key = `${nx},${ny}`;
+      game.pingTargets.delete(key);
       const item = game.items[key];
 
       if (item) {
@@ -1134,10 +1395,19 @@
       if (atExit && allRescued) {
         game.over = true;
         const finalScore = game.score + game.steps * 10 + game.energy;
+        const prevBest = saveData.highscores[game.level.id] || 0;
+        const isNewRecord = finalScore > prevBest;
+        if (isNewRecord) {
+          saveData.highscores[game.level.id] = finalScore;
+          persistSave();
+          renderHighscores();
+        }
         showResult(
           true,
           '🏆 Komunitas Tumbuh & Kompak!',
-          `Selamat ${player.name}! Semua ${game.level.membersToRescue} anggota baru berhasil diajak keluar dari labirin ${game.level.name} dengan skor akhir ${finalScore}.`
+          `Selamat ${player.name}! Semua ${game.level.membersToRescue} anggota baru berhasil diajak keluar dari labirin ${game.level.name} dengan skor akhir ${finalScore}.`,
+          saveData.highscores[game.level.id],
+          isNewRecord
         );
         return;
       } else if (atExit && !allRescued) {
@@ -1149,22 +1419,29 @@
         showResult(
           false,
           '💔 Energi Tim Habis',
-          `Terlalu banyak jebakan di labirin ${game.level.name}. Coba ambil hadiah 🎁 atau gunakan peran Pendamai!`
+          `Terlalu banyak jebakan di labirin ${game.level.name}. Coba ambil hadiah 🎁 atau gunakan peran Pendamai!`,
+          saveData.highscores[game.level.id] || 0,
+          false
         );
       } else if (game.steps <= 0) {
         game.over = true;
         showResult(
           false,
           '⏳ Langkah Habis di Labirin',
-          `Kamu berhasil mengajak ${game.squad.length - 1} dari ${game.level.membersToRescue} anggota baru sebelum kehabisan langkah.`
+          `Kamu berhasil mengajak ${game.squad.length - 1} dari ${game.level.membersToRescue} anggota baru sebelum kehabisan langkah.`,
+          saveData.highscores[game.level.id] || 0,
+          false
         );
       }
     }
 
-    function showResult(isWin, title, desc) {
+    function showResult(isWin, title, desc, bestScore, isNewRecord) {
       document.getElementById('resultEmoji').textContent = isWin ? '🎉' : '🧭';
       document.getElementById('resultTitle').textContent = title;
       document.getElementById('resultDesc').textContent = desc;
+      document.getElementById('recordPill').textContent = isNewRecord
+        ? `🌟 Rekor Baru Level: ${bestScore} pts!`
+        : `🏅 Rekor Terbaik Level: ${bestScore} pts`;
 
       const nextBtn = document.getElementById('nextLevelBtn');
       if (isWin && selectedLevelIndex < LEVELS.length - 1) {
@@ -1184,11 +1461,11 @@
 
     function resetToSetup() {
       game.over = true;
+      renderHighscores();
       document.getElementById('headerBadge').textContent = 'Kustom Karakter & Pilih Level';
       switchScreen('setupScreen');
     }
 
-    // Keyboard Support (Arrow & WASD)
     window.addEventListener('keydown', (e) => {
       if (!document.getElementById('gameScreen').classList.contains('active')) return;
       const key = e.key.toLowerCase();
@@ -1197,6 +1474,28 @@
       if (key === 'arrowleft' || key === 'a') { e.preventDefault(); movePlayer(-1, 0); }
       if (key === 'arrowright' || key === 'd') { e.preventDefault(); movePlayer(1, 0); }
     });
+
+    // PWA Install Prompt & Service Worker Registration
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.add('visible');
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.classList.remove('visible');
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
 
     initSetupUI();
   </script>
