@@ -148,7 +148,7 @@
       color: #fde68a;
       border-radius: 14px;
       padding: 10px 14px;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -170,6 +170,78 @@
       color: #6ee7b7;
     }
 
+    /* NOTIFIKASI MOTIVASI KADO + TOMBOL BAGIKAN */
+    .quote-notif {
+      display: none;
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.16), rgba(56, 189, 248, 0.14));
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: slideDown 0.22s ease;
+    }
+
+    .quote-notif.visible {
+      display: flex;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quote-meta {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #7dd3fc;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .quote-copy {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1.35;
+    }
+
+    .quote-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .share-quote-btn {
+      background: var(--cyan);
+      color: #082f49;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 11px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .share-quote-btn:hover {
+      background: #7dd3fc;
+    }
+
+    .close-quote-btn {
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 9px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     .play-grid {
       display: grid;
       grid-template-columns: 1.32fr 1fr;
@@ -180,6 +252,10 @@
     @media (max-width: 800px) {
       .play-grid {
         grid-template-columns: 1fr;
+      }
+      .quote-notif {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
 
@@ -444,6 +520,18 @@
         <span class="quest-status" id="questBadge">Belum Selesai</span>
       </div>
 
+      <!-- NOTIFIKASI KATA MOTIVASI KADO -->
+      <div class="quote-notif" id="quoteNotif" role="status" aria-live="polite">
+        <div>
+          <div class="quote-meta" id="quoteTopic">🎁 KADO MOTIVASI • KOMITMEN</div>
+          <div class="quote-copy" id="quoteCopy">Ambil kado di labirin untuk membuka pesan motivasi acak.</div>
+        </div>
+        <div class="quote-actions">
+          <button class="share-quote-btn" id="shareQuoteBtn" type="button">📤 Bagikan</button>
+          <button class="close-quote-btn" id="closeQuoteBtn" type="button" title="Tutup">✕</button>
+        </div>
+      </div>
+
       <div class="play-grid">
         <div class="board-frame" id="boardFrame">
           <div class="board-grid" id="boardGrid"></div>
@@ -464,9 +552,9 @@
 
           <div class="key-legend">
             <div>🙋 <span>Anggota Berperan</span></div>
-            <div>🎁 <span>Hadiah (+Energi/Langkah)</span></div>
-            <div>🕳️ <span>Konflik (-Energi)</span></div>
-            <div>🔥 <span>Rumor (-Langkah)</span></div>
+            <div>🎁 <span>Kado + Motivasi</span></div>
+            <div>🕳️ <span>Rintangan Konflik (Lewat)</span></div>
+            <div>🔥 <span>Rintangan Rumor (Lewat)</span></div>
             <div>🚪 <span>Pintu Markas</span></div>
             <div>⌨️ <span>Arrow / WASD</span></div>
           </div>
@@ -481,7 +569,7 @@
       </div>
 
       <div class="status-bar">
-        <span id="eventLog">Ajak semua anggota, selesaikan mini misi, lalu buka pintu markas!</span>
+        <span id="eventLog">Semua jalur terbuka acak; rintangan bisa dilalui tanpa menghalangi arah gerak.</span>
         <button class="ghost-btn" id="restartBtn" type="button">Acak Ulang Level</button>
       </div>
     </section>
@@ -503,10 +591,24 @@
   <script>
     const HUB_KEY = 'komunitas_hub_state_v1';
 
+    // Jalur dibuat lebih terbuka secara acak (braid tinggi & jalur pusat terbuka)
     const DIFF_SPECS = [
-      { id: 'easy', label: '🌱 Mudah', gridStart: 9, crewStart: 2, stepsStart: 36, hazardFactor: 0.7, braid: 0.16 },
-      { id: 'medium', label: '🔥 Agak Sulit', gridStart: 11, crewStart: 3, stepsStart: 50, hazardFactor: 1.0, braid: 0.11 },
-      { id: 'hard', label: '⚡ Sulit', gridStart: 13, crewStart: 4, stepsStart: 68, hazardFactor: 1.35, braid: 0.07 }
+      { id: 'easy', label: '🌱 Mudah', gridStart: 9, crewStart: 2, stepsStart: 36, hazardFactor: 0.7, braid: 0.55 },
+      { id: 'medium', label: '🔥 Agak Sulit', gridStart: 11, crewStart: 3, stepsStart: 50, hazardFactor: 1.0, braid: 0.45 },
+      { id: 'hard', label: '⚡ Sulit', gridStart: 13, crewStart: 4, stepsStart: 68, hazardFactor: 1.35, braid: 0.36 }
+    ];
+
+    // Bank kata motivasi singkat acak: Komitmen, Konsisten, Belajar
+    const MOTIVATION_QUOTES = [
+      { theme: 'Komitmen', text: 'Komitmen bukan soal suasana hati, melainkan keputusan yang tetap dijaga saat jalan berliku.' },
+      { theme: 'Komitmen', text: 'Satu janji kecil yang ditepati hari ini membangun kepercayaan besar bagi tim esok hari.' },
+      { theme: 'Komitmen', text: 'Fokus pada tujuan yang dipilih; hambatan boleh singgah, komitmen tetap melangkah.' },
+      { theme: 'Konsisten', text: 'Konsisten sedikit demi sedikit jauh lebih kuat daripada semangat besar yang cepat padam.' },
+      { theme: 'Konsisten', text: 'Langkah rutin yang diulang setiap hari perlahan mengubah jarak menjadi capaian nyata.' },
+      { theme: 'Konsisten', text: 'Tidak perlu sempurna sekaligus; cukup tetap hadir dan bergerak secara konsisten.' },
+      { theme: 'Belajar', text: 'Setiap tikungan baru adalah ruang belajar untuk membaca arah dengan lebih jernih.' },
+      { theme: 'Belajar', text: 'Kesalahan kecil bukan akhir langkah, melainkan catatan belajar untuk putaran berikutnya.' },
+      { theme: 'Belajar', text: 'Orang yang terus belajar selalu menemukan celah baru di tengah tantangan.' }
     ];
 
     const ALLY_POOL = [
@@ -675,6 +777,49 @@
 
     SynthAudio.setActive(hub.sound !== false);
 
+    let latestQuote = null;
+    let lastQuoteIndex = -1;
+
+    function pickRandomQuote() {
+      if (MOTIVATION_QUOTES.length === 1) return MOTIVATION_QUOTES[0];
+      let idx = Math.floor(Math.random() * MOTIVATION_QUOTES.length);
+      if (idx === lastQuoteIndex) {
+        idx = (idx + 1) % MOTIVATION_QUOTES.length;
+      }
+      lastQuoteIndex = idx;
+      return MOTIVATION_QUOTES[idx];
+    }
+
+    function showQuoteNotification(quoteObj) {
+      latestQuote = quoteObj;
+      document.getElementById('quoteTopic').textContent = `🎁 KADO MOTIVASI • ${quoteObj.theme.toUpperCase()}`;
+      document.getElementById('quoteCopy').textContent = `"${quoteObj.text}"`;
+      document.getElementById('quoteNotif').classList.add('visible');
+    }
+
+    async function shareActiveQuote() {
+      if (!latestQuote) return;
+      const payload = `Motivasi (${latestQuote.theme}): "${latestQuote.text}" — Labirin Komunitas`;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Motivasi ${latestQuote.theme}`,
+            text: payload
+          });
+          popupNotice('📤 Motivasi berhasil dibagikan!', '#0284c7');
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
+      }
+      try {
+        await navigator.clipboard.writeText(payload);
+        popupNotice('📋 Teks motivasi disalin ke clipboard!', '#059669');
+      } catch {
+        popupNotice('ℹ️ Salin manual: ' + payload, '#334155');
+      }
+    }
+
     function renderCharacterSvg(color, hair, isCaptain = false) {
       let top = `<path d="M31 28 Q50 12 69 28 Z" fill="#1e293b"/>`;
       if (hair === 'curly') {
@@ -697,7 +842,8 @@
       `;
     }
 
-    function buildMazeLayout(desiredSize, extraLoopChance) {
+    // Semua jalan terbuka namun tetap acak (tidak ada blokade/dead-end penghalang)
+    function buildOpenRandomMaze(desiredSize, extraLoopChance) {
       const n = desiredSize % 2 === 0 ? desiredSize + 1 : desiredSize;
       const cells = Array.from({ length: n }, () => Array(n).fill(1));
       const jumps = [[0, -2], [2, 0], [0, 2], [-2, 0]];
@@ -724,14 +870,20 @@
 
       dig(1, 1);
 
+      // Buka banyak dinding pembatas secara acak agar rute saling terhubung bebas
       for (let y = 1; y < n - 1; y++) {
         for (let x = 1; x < n - 1; x++) {
           if (cells[y][x] === 1 && Math.random() < extraLoopChance) {
-            const openH = cells[y][x - 1] === 0 && cells[y][x + 1] === 0;
-            const openV = cells[y - 1][x] === 0 && cells[y + 1][x] === 0;
-            if (openH || openV) cells[y][x] = 0;
+            cells[y][x] = 0;
           }
         }
+      }
+
+      // Pastikan koridor tengah dan tepi dalam terbuka acak agar pergerakan leluasa
+      const mid = Math.floor(n / 2);
+      for (let i = 1; i < n - 1; i++) {
+        if (Math.random() < 0.75) cells[mid][i] = 0;
+        if (Math.random() < 0.75) cells[i][mid] = 0;
       }
 
       cells[1][1] = 0;
@@ -747,7 +899,7 @@
       const hazardsCount = Math.max(2, Math.round((1 + levelNum * 0.65) * spec.hazardFactor));
       const budgetSteps = spec.stepsStart + (levelNum - 1) * 4 + (size - spec.gridStart) * 2;
       const quest = LEVEL_QUESTS[(levelNum - 1) % LEVEL_QUESTS.length];
-      const layout = buildMazeLayout(size, spec.braid);
+      const layout = buildOpenRandomMaze(size, spec.braid);
 
       return {
         recordKey: `${spec.label} — Lv.${levelNum}`,
@@ -818,9 +970,10 @@
         entities[`${pt.x},${pt.y}`] = { kind: 'gift', variant: i % 2 === 0 ? 'energy' : 'steps' };
       }
 
+      // Rintangan ditempatkan pada sel lantai terbuka (walkable = 0) agar tidak menghalangi jalan
       for (let i = 0; i < stage.hazardsCount && ptr < freeTiles.length; i++, ptr++) {
         const pt = freeTiles[ptr];
-        entities[`${pt.x},${pt.y}`] = { kind: 'hazard', variant: i % 2 === 0 ? 'conflict' : 'rumor' };
+        entities[`${pt.x},${pt.y}`] = { kind: 'hazard', variant: i % 2 === 0 ? 'conflict' : 'rumor', passable: true };
       }
 
       const seen = new Set();
@@ -854,8 +1007,9 @@
         ended: false
       };
 
+      document.getElementById('quoteNotif').classList.remove('visible');
       document.getElementById('stageTag').textContent = `${stage.diffLabel} • Lv.${levelNum} (${dim}×${dim})`;
-      document.getElementById('eventLog').textContent = 'Ajak semua anggota, selesaikan mini misi, lalu buka pintu markas!';
+      document.getElementById('eventLog').textContent = 'Semua jalur terbuka acak; rintangan bisa dilalui tanpa menghalangi arah gerak.';
       syncQuest();
       syncRadarButton();
       drawBoard();
@@ -990,6 +1144,7 @@
       setTimeout(() => pill.remove(), 1300);
     }
 
+    // Rintangan tidak pernah memblokir pergerakan selama sel bukan dinding (1)
     function stepHero(dx, dy) {
       if (st.ended) return;
       const nx = st.px + dx;
@@ -1037,19 +1192,25 @@
           st.score += 50 * factor;
           popupNotice(`🎁 +${addSt} Langkah!`, '#2563eb');
         }
+        const quote = pickRandomQuote();
+        showQuoteNotification(quote);
+        document.getElementById('eventLog').textContent = `Kado (${quote.theme}): "${quote.text}"`;
         SynthAudio.reward(st.stage.levelNum, st.stage.diffId);
       } else if (ent.kind === 'hazard') {
+        // Rintangan dilewati langsung tanpa menghalangi langkah pemain
         delete st.entities[coord];
         st.hazardsHit += 1;
         const damp = role === 'shield' ? 0.5 : 1;
         if (ent.variant === 'conflict') {
           const dropEn = Math.round(28 * damp);
           st.energy = Math.max(0, st.energy - dropEn);
-          popupNotice(`🕳️ Konflik: -${dropEn}% Energi`, '#dc2626');
+          popupNotice(`🕳️ Melewati Konflik (-${dropEn}% Energi)`, '#dc2626');
+          document.getElementById('eventLog').textContent = `Rintangan konflik dilalui (-${dropEn}% energi), jalur tetap terbuka.`;
         } else {
           const dropSt = Math.max(2, Math.round(5 * damp));
           st.steps = Math.max(0, st.steps - dropSt);
-          popupNotice(`🔥 Rumor: -${dropSt} Langkah`, '#d97706');
+          popupNotice(`🔥 Melewati Rumor (-${dropSt} Langkah)`, '#d97706');
+          document.getElementById('eventLog').textContent = `Rintangan rumor dilalui (-${dropSt} langkah), jalur tetap terbuka.`;
         }
         SynthAudio.hazard(st.stage.levelNum, st.stage.diffId);
       }
@@ -1126,6 +1287,11 @@
 
       setTimeout(() => setViewPane('summaryPane'), 350);
     }
+
+    document.getElementById('shareQuoteBtn').addEventListener('click', shareActiveQuote);
+    document.getElementById('closeQuoteBtn').addEventListener('click', () => {
+      document.getElementById('quoteNotif').classList.remove('visible');
+    });
 
     document.getElementById('radarBtn').addEventListener('click', triggerRadar);
     document.getElementById('restartBtn').addEventListener('click', () => initStage(activeDiffId, activeLevelNum));
