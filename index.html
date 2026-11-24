@@ -3,1501 +3,694 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#059669" />
-  <meta name="description" content="Game Labirin Komunitas — kustom karakter, ajak anggota baru, mini misi, labirin acak 1-10, dan efek suara." />
-  <title>Labirin Komunitas - Tumbuh Bersama</title>
+  <meta name="theme-color" content="#b45309" />
+  <title>Labirin Komunitas</title>
   <style>
     :root {
-      --bg: #f0fdf4;
-      --card: #ffffff;
-      --primary: #10b981;
-      --primary-dark: #059669;
-      --secondary: #f59e0b;
-      --danger: #ef4444;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+      --bg-warm: #faf5eb;
+      --surface: #fffdf9;
+      --surface-alt: #f3ead8;
+      --ink: #292524;
+      --muted: #78716c;
+      --accent: #b45309;
+      --accent-hover: #92400e;
+      --sage: #15803d;
+      --line: #e7dec8;
+      --shadow: 0 18px 40px rgba(68, 51, 28, 0.08);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #ecfdf5 0%, #e0f2fe 100%);
-      color: var(--text);
       min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, #fef3c7 0%, transparent 45%),
+        radial-gradient(circle at bottom right, #dcfce7 0%, transparent 40%),
+        var(--bg-warm);
+      color: var(--ink);
+      padding: 24px 16px;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 16px;
     }
 
-    .app {
+    .studio-shell {
       width: 100%;
-      max-width: 1020px;
-      background: var(--card);
-      border-radius: 24px;
+      max-width: 1040px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 28px;
       box-shadow: var(--shadow);
       overflow: hidden;
-      border: 1px solid var(--border);
     }
 
-    header {
-      background: linear-gradient(120deg, #059669, #10b981);
-      color: white;
-      padding: 16px 24px;
+    .topbar {
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
     }
 
-    header h1 {
-      font-size: 1.3rem;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .topbar-controls {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      background: rgba(255, 255, 255, 0.22);
-      padding: 5px 14px;
-      border-radius: 999px;
-      font-size: 0.84rem;
-      font-weight: 600;
-    }
-
-    .btn-sound {
-      background: rgba(255, 255, 255, 0.92);
-      color: #0f172a;
-      border: none;
-      padding: 6px 12px;
+    .pill-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 14px;
       border-radius: 999px;
       font-size: 0.82rem;
       font-weight: 700;
       cursor: pointer;
+      text-decoration: none;
+      transition: 0.16s ease;
     }
 
-    .screen {
-      display: none;
-      padding: 22px 26px;
-      animation: fadeIn 0.25s ease;
+    .pill-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
-    .screen.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .setup-grid {
+    .main-grid {
       display: grid;
-      grid-template-columns: 1fr 1.35fr;
-      gap: 24px;
-      align-items: start;
+      grid-template-columns: 340px 1fr;
+      gap: 28px;
+      padding: 28px;
     }
 
-    @media (max-width: 800px) {
-      .setup-grid { grid-template-columns: 1fr; }
+    @media (max-width: 840px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .preview-box {
-      background: #f8fafc;
-      border: 2px dashed #cbd5e1;
-      border-radius: 20px;
-      padding: 20px;
+    .profile-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .avatar-stage {
-      width: 118px;
-      height: 118px;
-      animation: float 2.6s ease-in-out infinite;
+    .avatar-ring {
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid var(--line);
+      display: grid;
+      place-items: center;
+      margin-bottom: 12px;
+      animation: gentleBob 2.8s ease-in-out infinite;
     }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-7px); }
+    @keyframes gentleBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
     }
 
-    .highscores-box {
-      margin-top: 14px;
+    .profile-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .profile-sub {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .records-panel {
+      margin-top: 18px;
       width: 100%;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
       text-align: left;
-      font-size: 0.8rem;
-      max-height: 210px;
-      overflow-y: auto;
     }
 
-    .highscores-box h4 {
-      margin-bottom: 8px;
-      color: var(--primary-dark);
-      font-size: 0.85rem;
-    }
-
-    .hs-row {
+    .records-header {
       display: flex;
       justify-content: space-between;
-      padding: 4px 0;
-      border-bottom: 1px dashed #f1f5f9;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: 700;
+    .records-header h2 {
       font-size: 0.88rem;
-      margin-bottom: 7px;
+      color: var(--accent);
     }
 
-    input[type="text"] {
+    .reset-link {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .records-list {
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+    }
+
+    .record-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 2px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .record-item:last-child {
+      border-bottom: none;
+    }
+
+    .step-block {
+      margin-bottom: 18px;
+    }
+
+    .step-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .text-field {
       width: 100%;
-      padding: 10px 14px;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      font-size: 0.96rem;
+      padding: 11px 14px;
+      border-radius: 14px;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      font-size: 0.95rem;
+      color: var(--ink);
       outline: none;
     }
 
-    input[type="text"]:focus {
-      border-color: var(--primary);
+    .text-field:focus {
+      border-color: var(--accent);
     }
 
-    .option-row {
+    .flex-row {
       display: flex;
-      gap: 8px;
       flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .chip {
-      padding: 7px 12px;
+    .choice-chip {
+      padding: 8px 13px;
       border-radius: 12px;
-      border: 2px solid var(--border);
-      background: white;
-      cursor: pointer;
+      border: 1.5px solid var(--line);
+      background: #fff;
+      color: var(--ink);
       font-size: 0.84rem;
-      font-weight: 600;
-      transition: all 0.18s;
-    }
-
-    .chip:hover {
-      border-color: var(--primary);
-    }
-
-    .chip.selected {
-      border-color: var(--primary);
-      background: #ecfdf5;
-      color: var(--primary-dark);
-    }
-
-    .color-dot {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      font-weight: 700;
       cursor: pointer;
-      border: 3px solid transparent;
-      transition: transform 0.18s;
+      transition: 0.15s ease;
     }
 
-    .color-dot.selected {
-      border-color: #0f172a;
+    .choice-chip:hover {
+      border-color: var(--accent);
+    }
+
+    .choice-chip.active {
+      background: #fef3c7;
+      border-color: var(--accent);
+      color: var(--accent-hover);
+    }
+
+    .swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .swatch.active {
+      border-color: var(--ink);
       transform: scale(1.14);
     }
 
-    .diff-grid {
+    .diff-columns {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
 
-    @media (max-width: 620px) {
-      .diff-grid { grid-template-columns: 1fr; }
+    @media (max-width: 600px) {
+      .diff-columns {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .diff-card {
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 12px;
+    .diff-option {
+      border: 1.5px solid var(--line);
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px;
       cursor: pointer;
-      transition: all 0.18s;
+      text-align: left;
+      transition: 0.15s ease;
     }
 
-    .diff-card:hover {
-      border-color: var(--primary);
+    .diff-option:hover {
+      border-color: var(--accent);
     }
 
-    .diff-card.selected {
-      border-color: var(--primary);
-      background: #ecfdf5;
+    .diff-option.active {
+      background: #fef3c7;
+      border-color: var(--accent);
     }
 
-    .diff-card p {
-      font-size: 0.75rem;
+    .diff-option strong {
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .diff-option span {
+      font-size: 0.76rem;
       color: var(--muted);
-      margin-top: 3px;
     }
 
-    .level-num-grid {
+    .level-strip {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
       gap: 6px;
     }
 
-    @media (max-width: 580px) {
-      .level-num-grid { grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 560px) {
+      .level-strip {
+        grid-template-columns: repeat(5, 1fr);
+      }
     }
 
-    .lvl-btn {
-      padding: 8px 4px;
-      border-radius: 10px;
-      border: 2px solid var(--border);
-      background: white;
-      font-weight: 700;
-      font-size: 0.82rem;
-      cursor: pointer;
-    }
-
-    .lvl-btn.selected {
-      border-color: var(--primary);
-      background: #ecfdf5;
-      color: var(--primary-dark);
-    }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #f8fafc;
-      border: 2px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 14px;
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-size: 0.98rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    /* GAMEPLAY */
-    .hud {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 640px) {
-      .hud { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .stat-card {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 14px;
-    }
-
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    .stat-val {
-      font-size: 1.15rem;
+    .lvl-pick {
+      padding: 9px 4px;
+      border-radius: 11px;
+      border: 1.5px solid var(--line);
+      background: #fff;
       font-weight: 800;
-      margin-top: 2px;
+      font-size: 0.84rem;
+      cursor: pointer;
     }
 
-    .mission-banner {
-      background: #fffbeb;
-      border: 1.5px solid #fcd34d;
-      color: #78350f;
-      border-radius: 14px;
-      padding: 10px 14px;
-      margin-bottom: 14px;
+    .lvl-pick.active {
+      background: var(--sage);
+      border-color: var(--sage);
+      color: #fff;
+    }
+
+    .fog-box {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      font-size: 0.86rem;
-      font-weight: 600;
-    }
-
-    .mission-pill {
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      white-space: nowrap;
-    }
-
-    .mission-pill.done {
-      background: #dcfce7;
-      border-color: #10b981;
-      color: #065f46;
-    }
-
-    .game-layout {
-      display: grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    @media (max-width: 780px) {
-      .game-layout { grid-template-columns: 1fr; }
-    }
-
-    .maze-wrapper {
-      background: #1e293b;
-      padding: 12px;
-      border-radius: 18px;
-      display: flex;
-      justify-content: center;
-      position: relative;
-    }
-
-    .maze-grid {
-      display: grid;
-      gap: 2px;
-      width: 100%;
-      max-width: 450px;
-      aspect-ratio: 1 / 1;
-    }
-
-    .cell {
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      user-select: none;
-      transition: opacity 0.2s;
-    }
-
-    .cell.fog {
-      opacity: 0.14;
-      filter: blur(1px);
-    }
-
-    .cell.radar-ping {
-      outline: 2px solid #38bdf8;
-      box-shadow: 0 0 10px #38bdf8;
-      z-index: 4;
-    }
-
-    .cell.wall {
-      background: #334155;
-    }
-
-    .cell.path {
-      background: #f1f5f9;
-    }
-
-    .cell.exit-locked {
-      background: #e2e8f0;
-      opacity: 0.72;
-    }
-
-    .cell.exit-open {
-      background: #fef08a;
-    }
-
-    .side-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .squad-box {
-      background: linear-gradient(180deg, #e0f2fe 0%, #dcfce7 100%);
-      border: 2px solid #cbd5e1;
+      background: var(--surface-alt);
+      border: 1.5px solid var(--line);
       border-radius: 16px;
-      padding: 12px;
-      min-height: 150px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      cursor: pointer;
     }
 
-    .squad-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .squad-member {
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 6px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 78px;
-      text-align: center;
-    }
-
-    .squad-member .m-name {
-      font-size: 0.72rem;
-      font-weight: 700;
-      margin-top: 2px;
-    }
-
-    .squad-member .m-perk {
-      font-size: 0.64rem;
-      color: #059669;
-      font-weight: 600;
-      line-height: 1.15;
-    }
-
-    .skill-btn {
+    .launch-btn {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 2px solid #0284c7;
-      background: #f0f9ff;
-      color: #0369a1;
-      font-weight: 700;
-      font-size: 0.85rem;
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 800;
       cursor: pointer;
+      transition: 0.16s ease;
     }
 
-    .skill-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      border-color: var(--border);
-      color: var(--muted);
-      background: #f8fafc;
-    }
-
-    .legend-box {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px;
-      font-size: 0.78rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-
-    .dpad {
-      display: grid;
-      grid-template-columns: repeat(3, 52px);
-      grid-template-rows: repeat(2, 46px);
-      gap: 6px;
-      justify-content: center;
-    }
-
-    .dpad button {
-      background: white;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      font-size: 1.15rem;
-      cursor: pointer;
-    }
-
-    .dpad .up { grid-column: 2; grid-row: 1; }
-    .dpad .left { grid-column: 1; grid-row: 2; }
-    .dpad .down { grid-column: 2; grid-row: 2; }
-    .dpad .right { grid-column: 3; grid-row: 2; }
-
-    .toast-pop {
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.92);
-      color: white;
-      padding: 7px 14px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      z-index: 20;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    .log-box {
-      margin-top: 12px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 0.83rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .result-box {
-      text-align: center;
-      padding: 28px 16px;
-    }
-
-    .record-pill {
-      display: inline-block;
-      background: #fef3c7;
-      color: #92400e;
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 6px 14px;
-      border-radius: 999px;
-      margin: 12px 0 18px;
+    .launch-btn:hover {
+      background: var(--accent-hover);
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>🧭 Labirin Komunitas v2</h1>
-      <div class="header-actions">
-        <button class="btn-sound" id="soundToggleBtn" onclick="toggleSound()">🔊 Suara: ON</button>
-        <span class="badge" id="headerBadge">Kustom Karakter & Pilih Level 1–10</span>
+  <div class="studio-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">🧭</div>
+        <div>
+          <h1>Studio Pemimpin Komunitas</h1>
+          <p>Halaman 1 dari 2 • Atur karakter, pilih level 1–10, lalu masuk arena</p>
+        </div>
+      </div>
+      <div class="topbar-controls">
+        <button class="pill-btn" id="soundBtn" type="button">🔊 Suara: ON</button>
+        <a class="pill-btn" href="game.html?diff=easy&level=1">Langsung ke Arena →</a>
       </div>
     </header>
 
-    <!-- SETUP -->
-    <div class="screen active" id="setupScreen">
-      <div class="setup-grid">
-        <div class="preview-box">
-          <div class="avatar-stage" id="avatarPreview"></div>
-          <h3 id="previewName" style="margin-top: 10px;">Nara</h3>
-          <span id="previewRole" style="font-size: 0.82rem; color: var(--muted); margin-top: 4px;"></span>
+    <div class="main-grid">
+      <aside class="profile-card">
+        <div class="avatar-ring" id="avatarBox"></div>
+        <div class="profile-name" id="nameReadout">Nara</div>
+        <div class="profile-sub" id="roleReadout"></div>
 
-          <div class="highscores-box">
-            <h4>🏅 Rekor Skor Terbaik per Level</h4>
-            <div id="highscoresList"></div>
+        <div class="records-panel">
+          <div class="records-header">
+            <h2>🏅 Papan Rekor</h2>
+            <button class="reset-link" id="clearRecordsBtn" type="button">Hapus</button>
           </div>
+          <div class="records-list" id="recordsList"></div>
+        </div>
+      </aside>
+
+      <section>
+        <div class="step-block">
+          <div class="step-title"><span class="step-num">1</span> Nama Pemimpin</div>
+          <input class="text-field" type="text" id="leaderName" maxlength="14" value="Nara" />
         </div>
 
-        <div>
-          <div class="form-group">
-            <label>1. Nama Karakter</label>
-            <input type="text" id="charNameInput" maxlength="14" value="Nara" />
-          </div>
-
-          <div class="form-group">
-            <label>2. Warna Baju</label>
-            <div class="option-row" id="colorOptions"></div>
-          </div>
-
-          <div class="form-group">
-            <label>3. Gaya Rambut & Aksesori</label>
-            <div class="option-row" id="styleOptions"></div>
-          </div>
-
-          <div class="form-group">
-            <label>4. Keahlian Karakter</label>
-            <div class="option-row" id="roleOptions"></div>
-          </div>
-
-          <div class="form-group">
-            <label>5. Tingkat Kesulitan</label>
-            <div class="diff-grid" id="diffOptions"></div>
-          </div>
-
-          <div class="form-group">
-            <label>6. Pilih Level (1 – 10)</label>
-            <div class="level-num-grid" id="levelNumOptions"></div>
-          </div>
-
-          <label class="toggle-row" for="fogToggle">
-            <div>
-              <strong>🌫️ Mode Kabut Misteri</strong><br />
-              <small style="color: var(--muted);">Sel belum dijelajahi tersamar kabut</small>
-            </div>
-            <input type="checkbox" id="fogToggle" style="width: 18px; height: 18px; accent-color: #059669;" />
-          </label>
-
-          <button class="btn-primary" id="startBtn">Mulai Petualangan 🚀</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- GAMEPLAY -->
-    <div class="screen" id="gameScreen">
-      <div class="hud">
-        <div class="stat-card">
-          <div class="stat-label">👥 Anggota Komunitas</div>
-          <div class="stat-val" id="statMembers">1 / 4</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">❤️ Energi Tim</div>
-          <div class="stat-val" id="statEnergy">100%</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">🎁 Poin</div>
-          <div class="stat-val" id="statScore">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">👣 Sisa Langkah</div>
-          <div class="stat-val" id="statSteps">40</div>
-        </div>
-      </div>
-
-      <div class="mission-banner">
-        <span id="missionText">🎯 Mini Misi: ...</span>
-        <span class="mission-pill" id="missionBadge">Belum Selesai</span>
-      </div>
-
-      <div class="game-layout">
-        <div class="maze-wrapper" id="mazeWrapper">
-          <div class="maze-grid" id="mazeGrid"></div>
+        <div class="step-block">
+          <div class="step-title"><span class="step-num">2</span> Warna Seragam</div>
+          <div class="flex-row" id="swatchGroup"></div>
         </div>
 
-        <div class="side-panel">
-          <div class="squad-box">
-            <div style="display:flex; justify-content:space-between; font-size:0.84rem; font-weight:700;">
-              <span>🌱 Barisan Komunitas</span>
-              <span id="doorStatus" style="color:#d97706;">🔒 Pintu Terkunci</span>
-            </div>
-            <div class="squad-list" id="squadList"></div>
-          </div>
-
-          <button class="skill-btn" id="skillBtn" onclick="useCommunitySkill()">
-            📡 Radar Komunitas (Siap)
-          </button>
-
-          <div class="legend-box">
-            <div>🙋 <span>Anggota Berperan</span></div>
-            <div>🎁 <span>Hadiah (+Energi/Langkah)</span></div>
-            <div>🕳️ <span>Jebakan Konflik (-Energi)</span></div>
-            <div>🔥 <span>Rintangan Rumor (-Langkah)</span></div>
-            <div>🚪 <span>Pintu Markas</span></div>
-            <div>⌨️ <span>Arrow / WASD</span></div>
-          </div>
-
-          <div class="dpad">
-            <button class="up" onclick="movePlayer(0, -1)">⬆️</button>
-            <button class="left" onclick="movePlayer(-1, 0)">⬅️</button>
-            <button class="down" onclick="movePlayer(0, 1)">⬇️</button>
-            <button class="right" onclick="movePlayer(1, 0)">➡️</button>
-          </div>
+        <div class="step-block">
+          <div class="step-title"><span class="step-num">3</span> Gaya Rambut & Aksesori</div>
+          <div class="flex-row" id="hairGroup"></div>
         </div>
-      </div>
 
-      <div class="log-box">
-        <span id="logText">Ajak semua anggota, tuntaskan mini misi level, lalu menuju pintu markas!</span>
-        <button class="chip" onclick="resetToSetup()">Menu Awal</button>
-      </div>
-    </div>
-
-    <!-- RESULT -->
-    <div class="screen" id="resultScreen">
-      <div class="result-box">
-        <div id="resultEmoji" style="font-size: 3.6rem;">🏆</div>
-        <h2 id="resultTitle" style="margin-top: 8px;">Level Selesai!</h2>
-        <p id="resultDesc" style="color: var(--muted); max-width: 520px; margin: 10px auto 0;"></p>
-        <div class="record-pill" id="recordPill">🏅 Rekor Level: 0 pts</div>
-        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-          <button class="btn-primary" style="max-width:230px;" id="nextLevelBtn">Level Berikutnya ➡️</button>
-          <button class="chip" style="padding:11px 18px;" onclick="resetToSetup()">Kembali ke Menu</button>
+        <div class="step-block">
+          <div class="step-title"><span class="step-num">4</span> Peran Utama</div>
+          <div class="flex-row" id="roleGroup"></div>
         </div>
-      </div>
+
+        <div class="step-block">
+          <div class="step-title"><span class="step-num">5</span> Tingkat Tantangan</div>
+          <div class="diff-columns" id="diffGroup"></div>
+        </div>
+
+        <div class="step-block">
+          <div class="step-title"><span class="step-num">6</span> Pilih Level (1 – 10)</div>
+          <div class="level-strip" id="levelGroup"></div>
+        </div>
+
+        <label class="fog-box" for="fogCheck">
+          <div>
+            <strong>🌫️ Kabut Misteri</strong>
+            <div style="font-size: 0.78rem; color: var(--muted);">Area yang belum terjamah disamarkan</div>
+          </div>
+          <input type="checkbox" id="fogCheck" style="width: 18px; height: 18px; accent-color: var(--accent);" />
+        </label>
+
+        <button class="launch-btn" id="goGameBtn" type="button">
+          Mulai Ekspedisi di Level 1 🚀
+        </button>
+      </section>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'labirin_komunitas_v2_save';
+    const STORE_KEY = 'komunitas_hub_state_v1';
 
-    const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
-    const STYLES = [
+    const SHIRT_COLORS = ['#15803d', '#0369a1', '#b45309', '#be185d', '#6d28d9', '#b91c1c'];
+    const HAIR_STYLES = [
       { id: 'short', label: 'Pendek Rapi' },
       { id: 'curly', label: 'Keriting' },
       { id: 'cap', label: 'Topi' },
       { id: 'glasses', label: 'Kacamata' }
     ];
-    const ROLES = [
-      { id: 'scout', label: '🧭 Penjelajah', desc: '+8 langkah awal' },
-      { id: 'shield', label: '🛡️ Pendamai', desc: 'jebakan -50%' },
-      { id: 'cheer', label: '✨ Penyemangat', desc: 'hadiah 2x' }
+    const LEADER_ROLES = [
+      { id: 'scout', label: '🧭 Penjelajah', perk: '+8 langkah awal' },
+      { id: 'shield', label: '🛡️ Pendamai', perk: 'efek jebakan -50%' },
+      { id: 'cheer', label: '✨ Penyemangat', perk: 'hadiah 2x lipat' }
+    ];
+    const DIFF_LEVELS = [
+      { id: 'easy', name: '🌱 Mudah', note: 'Jalur lebih terbuka' },
+      { id: 'medium', name: '🔥 Agak Sulit', note: 'Tantangan seimbang' },
+      { id: 'hard', name: '⚡ Sulit', note: 'Labirin padat & ketat' }
     ];
 
-    // Anggota baru kini punya peran & keunikan saat bergabung ke barisan
-    const NPC_ROLES = [
-      {
-        name: 'Budi', color: '#3b82f6', style: 'short',
-        perkTitle: 'Logistik (+5 Lkh)',
-        applyPerk: (g) => { g.steps += 5; return 'Logistik: +5 langkah'; }
-      },
-      {
-        name: 'Siti', color: '#ec4899', style: 'glasses',
-        perkTitle: 'Konselor (+15% En)',
-        applyPerk: (g) => { g.energy = Math.min(100, g.energy + 15); return 'Konselor: +15% energi'; }
-      },
-      {
-        name: 'Raka', color: '#f59e0b', style: 'cap',
-        perkTitle: 'Kurator (+80 Poin)',
-        applyPerk: (g) => { g.score += 80; return 'Kurator: +80 poin'; }
-      },
-      {
-        name: 'Ayu', color: '#8b5cf6', style: 'curly',
-        perkTitle: 'Radar (-2 CD)',
-        applyPerk: (g) => { g.skillCooldown = Math.max(0, g.skillCooldown - 2); return 'Koordinator: cooldown radar -2'; }
-      },
-      {
-        name: 'Dina', color: '#14b8a6', style: 'short',
-        perkTitle: 'Navigator (+6 Lkh)',
-        applyPerk: (g) => { g.steps += 6; return 'Navigator: +6 langkah'; }
-      },
-      {
-        name: 'Fajar', color: '#ef4444', style: 'glasses',
-        perkTitle: 'Mediator (+20% En)',
-        applyPerk: (g) => { g.energy = Math.min(100, g.energy + 20); return 'Mediator: +20% energi'; }
-      }
-    ];
-
-    const DIFFICULTIES = [
-      { id: 'easy', name: '🌱 Mudah', baseSize: 9, baseMembers: 2, baseSteps: 36, trapMult: 0.7 },
-      { id: 'medium', name: '🔥 Agak Sulit', baseSize: 11, baseMembers: 3, baseSteps: 50, trapMult: 1.0 },
-      { id: 'hard', name: '⚡ Sulit', baseSize: 13, baseMembers: 4, baseSteps: 68, trapMult: 1.35 }
-    ];
-
-    // 10 Mini Misi (satu untuk tiap level 1–10)
-    const MINI_MISSIONS = [
-      { id: 'collect_all', label: 'Ajak semua calon anggota di level ini', check: (g) => g.squad.length >= g.targetSquadSize },
-      { id: 'gifts_2', label: 'Ambil minimal 2 kotak hadiah 🎁', check: (g) => g.giftsCollected >= 2 },
-      { id: 'no_trap', label: 'Selesaikan tanpa terkena jebakan apa pun', check: (g) => g.trapsHit === 0 },
-      { id: 'use_radar', label: 'Aktifkan Radar Komunitas minimal 1 kali', check: (g) => g.radarUsed >= 1 },
-      { id: 'energy_80', label: 'Pertahankan energi tim minimal 80%', check: (g) => g.energy >= 80 },
-      { id: 'score_250', label: 'Kumpulkan minimal 250 poin', check: (g) => g.score >= 250 },
-      { id: 'steps_left_10', label: 'Capai pintu markas dengan sisa ≥ 10 langkah', check: (g) => g.steps >= 10 },
-      { id: 'gifts_3', label: 'Ambil minimal 3 kotak hadiah 🎁', check: (g) => g.giftsCollected >= 3 },
-      { id: 'energy_90', label: 'Capai pintu markas dengan energi ≥ 90%', check: (g) => g.energy >= 90 },
-      { id: 'master_combo', label: 'Ajak semua anggota, ≥ 2 hadiah, & ≤ 1 jebakan', check: (g) => g.squad.length >= g.targetSquadSize && g.giftsCollected >= 2 && g.trapsHit <= 1 }
-    ];
-
-    // --- EFEK SUARA (Web Audio API) DENGAN KARAKTER NADA BERBEDA TIAP MINI LEVEL ---
-    const SoundFX = (() => {
-      let ctx = null;
-      let enabled = true;
-
-      function ensureCtx() {
-        if (!enabled) return null;
-        if (!ctx) {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (AudioCtx) ctx = new AudioCtx();
-        }
-        if (ctx && ctx.state === 'suspended') {
-          ctx.resume().catch(() => {});
-        }
-        return ctx;
-      }
-
-      function tone(freq, duration = 0.08, type = 'sine', delay = 0, gainVal = 0.08) {
-        const c = ensureCtx();
-        if (!c) return;
-        const now = c.currentTime + delay;
-        const osc = c.createOscillator();
-        const gain = c.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(gainVal, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-        osc.connect(gain);
-        gain.connect(c.destination);
-        osc.start(now);
-        osc.stop(now + duration + 0.01);
-      }
-
-      // Pitch dasar bergeser halus sesuai nomor level (1-10) & kesulitan
-      function levelPitchFactor(levelNum = 1, diffId = 'easy') {
-        const diffShift = diffId === 'easy' ? 1.0 : diffId === 'medium' ? 1.06 : 1.12;
-        return (1 + (levelNum - 1) * 0.025) * diffShift;
-      }
-
-      return {
-        setEnabled(v) { enabled = v; },
-        isEnabled() { return enabled; },
-        step(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          tone(260 * p, 0.04, 'triangle', 0, 0.04);
-        },
-        joinMember(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          tone(440 * p, 0.09, 'sine', 0, 0.09);
-          tone(554 * p, 0.09, 'sine', 0.08, 0.09);
-          tone(659 * p, 0.14, 'triangle', 0.16, 0.1);
-        },
-        gift(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          tone(523 * p, 0.08, 'sine', 0, 0.08);
-          tone(784 * p, 0.12, 'sine', 0.07, 0.08);
-        },
-        trap(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          tone(210 * p, 0.11, 'sawtooth', 0, 0.08);
-          tone(145 * p, 0.16, 'sawtooth', 0.09, 0.08);
-        },
-        radar(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          tone(600 * p, 0.07, 'sine', 0, 0.07);
-          tone(900 * p, 0.1, 'sine', 0.06, 0.07);
-        },
-        missionDone(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          tone(587 * p, 0.08, 'triangle', 0, 0.09);
-          tone(880 * p, 0.15, 'triangle', 0.08, 0.09);
-        },
-        win(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          [523, 659, 784, 1046].forEach((f, idx) => {
-            tone(f * p, 0.14, 'triangle', idx * 0.1, 0.1);
-          });
-        },
-        lose(levelNum, diffId) {
-          const p = levelPitchFactor(levelNum, diffId);
-          [330, 277, 220].forEach((f, idx) => {
-            tone(f * p, 0.16, 'sawtooth', idx * 0.12, 0.07);
-          });
-        }
+    function readHubState() {
+      const fallback = {
+        profile: { name: 'Nara', color: SHIRT_COLORS[0], hair: 'short', role: 'scout' },
+        diff: 'easy',
+        level: 1,
+        fog: false,
+        sound: true,
+        records: {}
       };
-    })();
-
-    // --- GENERATOR LABIRIN ACAK (Recursive Backtracker + Loop) ---
-    function generateRandomMaze(size, extraOpenings = 0.12) {
-      // Pastikan ukuran ganjil
-      const n = size % 2 === 0 ? size + 1 : size;
-      const grid = Array.from({ length: n }, () => Array(n).fill(1));
-
-      const dirs = [
-        [0, -2],
-        [2, 0],
-        [0, 2],
-        [-2, 0]
-      ];
-
-      function shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      }
-
-      function carve(x, y) {
-        grid[y][x] = 0;
-        for (const [dx, dy] of shuffle([...dirs])) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx > 0 && nx < n - 1 && ny > 0 && ny < n - 1 && grid[ny][nx] === 1) {
-            grid[y + dy / 2][x + dx / 2] = 0;
-            carve(nx, ny);
-          }
-        }
-      }
-
-      carve(1, 1);
-
-      // Buka sebagian dinding internal agar ada jalur alternatif / taktik
-      for (let y = 1; y < n - 1; y++) {
-        for (let x = 1; x < n - 1; x++) {
-          if (grid[y][x] === 1 && Math.random() < extraOpenings) {
-            const horiz = grid[y][x - 1] === 0 && grid[y][x + 1] === 0;
-            const vert = grid[y - 1][x] === 0 && grid[y + 1][x] === 0;
-            if (horiz || vert) grid[y][x] = 0;
-          }
-        }
-      }
-
-      grid[1][1] = 0;
-      grid[n - 2][n - 2] = 0;
-      return { map: grid, start: { x: 1, y: 1 }, exit: { x: n - 2, y: n - 2 } };
-    }
-
-    function buildLevelConfig(diffId, levelNum) {
-      const diff = DIFFICULTIES.find(d => d.id === diffId) || DIFFICULTIES[0];
-      const size = Math.min(19, diff.baseSize + Math.floor((levelNum - 1) / 2) * 2);
-      const membersToRescue = Math.min(5, diff.baseMembers + Math.floor(levelNum / 4));
-      const gifts = Math.max(3, 2 + Math.floor(levelNum / 3));
-      const traps = Math.max(2, Math.round((1 + levelNum * 0.65) * diff.trapMult));
-      const steps = diff.baseSteps + (levelNum - 1) * 4 + (size - diff.baseSize) * 2;
-      const mission = MINI_MISSIONS[(levelNum - 1) % MINI_MISSIONS.length];
-      const maze = generateRandomMaze(size, diffId === 'easy' ? 0.16 : diffId === 'medium' ? 0.11 : 0.07);
-
-      return {
-        key: `${diff.id}_L${levelNum}`,
-        diffId: diff.id,
-        diffName: diff.name,
-        levelNum,
-        label: `${diff.name} — Level ${levelNum}`,
-        steps,
-        membersToRescue,
-        gifts,
-        traps,
-        mission,
-        ...maze
-      };
-    }
-
-    function loadSave() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { highscores: {}, fogMode: false, soundOn: true };
+        const raw = JSON.parse(localStorage.getItem(STORE_KEY));
+        return {
+          ...fallback,
+          ...(raw || {}),
+          profile: { ...fallback.profile, ...((raw && raw.profile) || {}) },
+          records: (raw && raw.records) || {}
+        };
       } catch {
-        return { highscores: {}, fogMode: false, soundOn: true };
+        return fallback;
       }
     }
 
-    function saveState() {
+    function writeHubState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          highscores: saved.highscores,
-          fogMode: saved.fogMode,
-          soundOn: SoundFX.isEnabled()
-        }));
+        localStorage.setItem(STORE_KEY, JSON.stringify(hubState));
       } catch {}
     }
 
-    const saved = loadSave();
-    SoundFX.setEnabled(saved.soundOn !== false);
+    const hubState = readHubState();
 
-    let player = { name: 'Nara', color: COLORS[0], style: 'short', role: 'scout' };
-    let selectedDiffId = 'easy';
-    let selectedLevelNum = 1;
-    let game = {};
-
-    function createAvatarSVG(color, style, isLeader = false) {
-      let acc = `<path d="M31 28 Q50 12 69 28 Z" fill="#1e293b"/>`;
-      if (style === 'curly') {
-        acc = `<circle cx="32" cy="24" r="9" fill="#1e293b"/><circle cx="50" cy="20" r="10" fill="#1e293b"/><circle cx="68" cy="24" r="9" fill="#1e293b"/>`;
-      } else if (style === 'cap') {
-        acc = `<path d="M30 28 Q50 10 70 28 Z" fill="#f59e0b"/><rect x="48" y="24" width="28" height="5" rx="2.5" fill="#d97706"/>`;
-      } else if (style === 'glasses') {
-        acc = `<path d="M32 26 Q50 14 68 26 Z" fill="#1e293b"/><circle cx="42" cy="38" r="6" fill="none" stroke="#0f172a" stroke-width="2.5"/><circle cx="58" cy="38" r="6" fill="none" stroke="#0f172a" stroke-width="2.5"/><line x1="48" y1="38" x2="52" y2="38" stroke="#0f172a" stroke-width="2.5"/>`;
+    function drawPortrait(color, hair, crowned = false) {
+      let headgear = `<path d="M31 28 Q50 12 69 28 Z" fill="#1c1917"/>`;
+      if (hair === 'curly') {
+        headgear = `<circle cx="32" cy="24" r="9" fill="#1c1917"/><circle cx="50" cy="20" r="10" fill="#1c1917"/><circle cx="68" cy="24" r="9" fill="#1c1917"/>`;
+      } else if (hair === 'cap') {
+        headgear = `<path d="M30 28 Q50 10 70 28 Z" fill="#d97706"/><rect x="48" y="24" width="28" height="5" rx="2.5" fill="#92400e"/>`;
+      } else if (hair === 'glasses') {
+        headgear = `<path d="M32 26 Q50 14 68 26 Z" fill="#1c1917"/><circle cx="42" cy="38" r="6" fill="none" stroke="#1c1917" stroke-width="2.5"/><circle cx="58" cy="38" r="6" fill="none" stroke="#1c1917" stroke-width="2.5"/><line x1="48" y1="38" x2="52" y2="38" stroke="#1c1917" stroke-width="2.5"/>`;
       }
-      const crown = isLeader ? `<polygon points="42,12 46,5 50,11 54,5 58,12" fill="#facc15"/>` : '';
+      const badge = crowned ? `<polygon points="42,12 46,5 50,11 54,5 58,12" fill="#f59e0b"/>` : '';
       return `
-        <svg viewBox="0 0 100 110" width="100%" height="100%">
+        <svg viewBox="0 0 100 110" width="96" height="106">
           <path d="M26 95 C26 68, 74 68, 74 95 Z" fill="${color}" />
           <circle cx="50" cy="38" r="19" fill="#fde68a" />
-          <circle cx="43" cy="38" r="2.3" fill="#1e293b" />
-          <circle cx="57" cy="38" r="2.3" fill="#1e293b" />
-          <path d="M44 45 Q50 51 56 45" fill="none" stroke="#1e293b" stroke-width="2.3" stroke-linecap="round"/>
-          ${acc}${crown}
+          <circle cx="43" cy="38" r="2.3" fill="#1c1917" />
+          <circle cx="57" cy="38" r="2.3" fill="#1c1917" />
+          <path d="M44 45 Q50 51 56 45" fill="none" stroke="#1c1917" stroke-width="2.3" stroke-linecap="round"/>
+          ${headgear}${badge}
         </svg>
       `;
     }
 
-    function toggleSound() {
-      const next = !SoundFX.isEnabled();
-      SoundFX.setEnabled(next);
-      document.getElementById('soundToggleBtn').textContent = next ? '🔊 Suara: ON' : '🔇 Suara: OFF';
-      saveState();
+    function syncPortrait() {
+      document.getElementById('avatarBox').innerHTML = drawPortrait(
+        hubState.profile.color,
+        hubState.profile.hair,
+        true
+      );
+      document.getElementById('nameReadout').textContent = hubState.profile.name;
+      const rObj = LEADER_ROLES.find(r => r.id === hubState.profile.role) || LEADER_ROLES[0];
+      document.getElementById('roleReadout').textContent = `${rObj.label} • ${rObj.perk}`;
+      document.getElementById('goGameBtn').textContent = `Mulai Ekspedisi di Level ${hubState.level} 🚀`;
     }
 
-    function renderHighscores() {
-      const box = document.getElementById('highscoresList');
-      const entries = Object.entries(saved.highscores || {});
-      if (!entries.length) {
-        box.innerHTML = `<div style="color:var(--muted)">Belum ada skor tersimpan. Mainkan level 1–10 untuk mencatat rekor!</div>`;
+    function syncRecords() {
+      const box = document.getElementById('recordsList');
+      const list = Object.entries(hubState.records);
+      if (!list.length) {
+        box.innerHTML = `<div style="color:var(--muted)">Belum ada rekor tersimpan.</div>`;
         return;
       }
-      box.innerHTML = entries
+      box.innerHTML = list
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10)
-        .map(([k, v]) => `<div class="hs-row"><span>${k}</span><strong>${v} pts</strong></div>`)
+        .map(([label, pts]) => `<div class="record-item"><span>${label}</span><strong>${pts} pts</strong></div>`)
         .join('');
     }
 
-    function initSetupUI() {
-      document.getElementById('soundToggleBtn').textContent = SoundFX.isEnabled() ? '🔊 Suara: ON' : '🔇 Suara: OFF';
-      document.getElementById('fogToggle').checked = Boolean(saved.fogMode);
-
-      const cBox = document.getElementById('colorOptions');
-      COLORS.forEach(c => {
-        const el = document.createElement('div');
-        el.className = 'color-dot' + (c === player.color ? ' selected' : '');
-        el.style.background = c;
-        el.onclick = () => {
-          player.color = c;
-          cBox.querySelectorAll('.color-dot').forEach(x => x.classList.remove('selected'));
-          el.classList.add('selected');
-          renderPreview();
-        };
-        cBox.appendChild(el);
+    function buildSetupPage() {
+      const nameInput = document.getElementById('leaderName');
+      nameInput.value = hubState.profile.name;
+      nameInput.addEventListener('input', (e) => {
+        hubState.profile.name = e.target.value.trim() || 'Nara';
+        syncPortrait();
+        writeHubState();
       });
 
-      const sBox = document.getElementById('styleOptions');
-      STYLES.forEach(s => {
+      const swatchGroup = document.getElementById('swatchGroup');
+      SHIRT_COLORS.forEach(hex => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'swatch' + (hex === hubState.profile.color ? ' active' : '');
+        dot.style.background = hex;
+        dot.onclick = () => {
+          hubState.profile.color = hex;
+          swatchGroup.querySelectorAll('.swatch').forEach(el => el.classList.remove('active'));
+          dot.classList.add('active');
+          syncPortrait();
+          writeHubState();
+        };
+        swatchGroup.appendChild(dot);
+      });
+
+      const hairGroup = document.getElementById('hairGroup');
+      HAIR_STYLES.forEach(item => {
         const btn = document.createElement('button');
-        btn.className = 'chip' + (s.id === player.style ? ' selected' : '');
-        btn.textContent = s.label;
+        btn.type = 'button';
+        btn.className = 'choice-chip' + (item.id === hubState.profile.hair ? ' active' : '');
+        btn.textContent = item.label;
         btn.onclick = () => {
-          player.style = s.id;
-          sBox.querySelectorAll('.chip').forEach(x => x.classList.remove('selected'));
-          btn.classList.add('selected');
-          renderPreview();
+          hubState.profile.hair = item.id;
+          hairGroup.querySelectorAll('.choice-chip').forEach(el => el.classList.remove('active'));
+          btn.classList.add('active');
+          syncPortrait();
+          writeHubState();
         };
-        sBox.appendChild(btn);
+        hairGroup.appendChild(btn);
       });
 
-      const rBox = document.getElementById('roleOptions');
-      ROLES.forEach(r => {
+      const roleGroup = document.getElementById('roleGroup');
+      LEADER_ROLES.forEach(role => {
         const btn = document.createElement('button');
-        btn.className = 'chip' + (r.id === player.role ? ' selected' : '');
-        btn.textContent = `${r.label} (${r.desc})`;
+        btn.type = 'button';
+        btn.className = 'choice-chip' + (role.id === hubState.profile.role ? ' active' : '');
+        btn.textContent = `${role.label} (${role.perk})`;
         btn.onclick = () => {
-          player.role = r.id;
-          rBox.querySelectorAll('.chip').forEach(x => x.classList.remove('selected'));
-          btn.classList.add('selected');
-          renderPreview();
+          hubState.profile.role = role.id;
+          roleGroup.querySelectorAll('.choice-chip').forEach(el => el.classList.remove('active'));
+          btn.classList.add('active');
+          syncPortrait();
+          writeHubState();
         };
-        rBox.appendChild(btn);
+        roleGroup.appendChild(btn);
       });
 
-      const dBox = document.getElementById('diffOptions');
-      DIFFICULTIES.forEach(d => {
-        const card = document.createElement('div');
-        card.className = 'diff-card' + (d.id === selectedDiffId ? ' selected' : '');
-        card.innerHTML = `<strong>${d.name}</strong><p>Labirin acak & level 1–10</p>`;
+      const diffGroup = document.getElementById('diffGroup');
+      DIFF_LEVELS.forEach(d => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'diff-option' + (d.id === hubState.diff ? ' active' : '');
+        card.innerHTML = `<strong>${d.name}</strong><span>${d.note}</span>`;
         card.onclick = () => {
-          selectedDiffId = d.id;
-          dBox.querySelectorAll('.diff-card').forEach(x => x.classList.remove('selected'));
-          card.classList.add('selected');
+          hubState.diff = d.id;
+          diffGroup.querySelectorAll('.diff-option').forEach(el => el.classList.remove('active'));
+          card.classList.add('active');
+          writeHubState();
         };
-        dBox.appendChild(card);
+        diffGroup.appendChild(card);
       });
 
-      const lBox = document.getElementById('levelNumOptions');
-      for (let i = 1; i <= 10; i++) {
+      const levelGroup = document.getElementById('levelGroup');
+      for (let lvl = 1; lvl <= 10; lvl++) {
         const btn = document.createElement('button');
-        btn.className = 'lvl-btn' + (i === selectedLevelNum ? ' selected' : '');
-        btn.textContent = i;
+        btn.type = 'button';
+        btn.className = 'lvl-pick' + (lvl === hubState.level ? ' active' : '');
+        btn.textContent = lvl;
         btn.onclick = () => {
-          selectedLevelNum = i;
-          lBox.querySelectorAll('.lvl-btn').forEach(x => x.classList.remove('selected'));
-          btn.classList.add('selected');
+          hubState.level = lvl;
+          levelGroup.querySelectorAll('.lvl-pick').forEach(el => el.classList.remove('active'));
+          btn.classList.add('active');
+          syncPortrait();
+          writeHubState();
         };
-        lBox.appendChild(btn);
+        levelGroup.appendChild(btn);
       }
 
-      document.getElementById('charNameInput').addEventListener('input', (e) => {
-        player.name = e.target.value.trim() || 'Pemimpin';
-        renderPreview();
+      const fogCheck = document.getElementById('fogCheck');
+      fogCheck.checked = Boolean(hubState.fog);
+      fogCheck.addEventListener('change', () => {
+        hubState.fog = fogCheck.checked;
+        writeHubState();
       });
 
-      document.getElementById('fogToggle').addEventListener('change', (e) => {
-        saved.fogMode = e.target.checked;
-        saveState();
-      });
-
-      document.getElementById('startBtn').onclick = () => startGame(selectedDiffId, selectedLevelNum);
-      renderPreview();
-      renderHighscores();
-    }
-
-    function renderPreview() {
-      document.getElementById('avatarPreview').innerHTML = createAvatarSVG(player.color, player.style, true);
-      document.getElementById('previewName').textContent = player.name;
-      const role = ROLES.find(r => r.id === player.role);
-      document.getElementById('previewRole').textContent = `${role.label} • ${role.desc}`;
-    }
-
-    function switchScreen(id) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    function revealAround(x, y, visited, size) {
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx >= 0 && nx < size && ny >= 0 && ny < size) visited.add(`${nx},${ny}`);
-        }
-      }
-    }
-
-    function startGame(diffId, levelNum) {
-      selectedDiffId = diffId;
-      selectedLevelNum = levelNum;
-      const lvl = buildLevelConfig(diffId, levelNum);
-      const size = lvl.map.length;
-
-      const openCells = [];
-      for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
-          const isStart = x === lvl.start.x && y === lvl.start.y;
-          const isExit = x === lvl.exit.x && y === lvl.exit.y;
-          if (lvl.map[y][x] === 0 && !isStart && !isExit) openCells.push({ x, y });
-        }
-      }
-      openCells.sort(() => Math.random() - 0.5);
-
-      const items = {};
-      let idx = 0;
-
-      for (let i = 0; i < lvl.membersToRescue && idx < openCells.length; i++, idx++) {
-        const cell = openCells[idx];
-        const npc = NPC_ROLES[(i + levelNum - 1) % NPC_ROLES.length];
-        items[`${cell.x},${cell.y}`] = { type: 'member', npc };
-      }
-
-      for (let i = 0; i < lvl.gifts && idx < openCells.length; i++, idx++) {
-        const cell = openCells[idx];
-        items[`${cell.x},${cell.y}`] = { type: 'gift', subtype: i % 2 === 0 ? 'energy' : 'steps' };
-      }
-
-      for (let i = 0; i < lvl.traps && idx < openCells.length; i++, idx++) {
-        const cell = openCells[idx];
-        items[`${cell.x},${cell.y}`] = { type: 'trap', subtype: i % 2 === 0 ? 'conflict' : 'rumor' };
-      }
-
-      const visited = new Set();
-      revealAround(lvl.start.x, lvl.start.y, visited, size);
-
-      game = {
-        level: lvl,
-        px: lvl.start.x,
-        py: lvl.start.y,
-        energy: 100,
-        steps: lvl.steps + (player.role === 'scout' ? 8 : 0),
-        score: 0,
-        items,
-        squad: [{ name: player.name, color: player.color, style: player.style, perkTitle: 'Pemimpin', isLeader: true }],
-        targetSquadSize: lvl.membersToRescue + 1,
-        fogMode: Boolean(saved.fogMode),
-        visited,
-        skillCooldown: 0,
-        pingTargets: new Set(),
-        giftsCollected: 0,
-        trapsHit: 0,
-        radarUsed: 0,
-        missionDone: false,
-        over: false
+      const soundBtn = document.getElementById('soundBtn');
+      const refreshSoundBtn = () => {
+        soundBtn.textContent = hubState.sound ? '🔊 Suara: ON' : '🔇 Suara: OFF';
       };
+      refreshSoundBtn();
+      soundBtn.addEventListener('click', () => {
+        hubState.sound = !hubState.sound;
+        refreshSoundBtn();
+        writeHubState();
+      });
 
-      document.getElementById('headerBadge').textContent = `${lvl.label} (${size}x${size} Acak)`;
-      updateMissionUI();
-      updateSkillButton();
-      renderMaze();
-      renderSquad();
-      updateHUD();
-      switchScreen('gameScreen');
+      document.getElementById('clearRecordsBtn').addEventListener('click', () => {
+        hubState.records = {};
+        writeHubState();
+        syncRecords();
+      });
+
+      document.getElementById('goGameBtn').addEventListener('click', () => {
+        writeHubState();
+        const url = `game.html?diff=${encodeURIComponent(hubState.diff)}&level=${encodeURIComponent(hubState.level)}`;
+        window.location.href = url;
+      });
+
+      syncPortrait();
+      syncRecords();
     }
 
-    function updateMissionUI() {
-      const m = game.level.mission;
-      const doneNow = m.check(game);
-      if (doneNow && !game.missionDone) {
-        game.missionDone = true;
-        game.score += 120;
-        SoundFX.missionDone(game.level.levelNum, game.level.diffId);
-        showToast('🎯 Mini Misi Tuntas! +120 Poin', '#059669');
-      }
-      document.getElementById('missionText').textContent = `🎯 Mini Misi Lv.${game.level.levelNum}: ${m.label}`;
-      const badge = document.getElementById('missionBadge');
-      badge.textContent = game.missionDone ? '✓ Misi Tuntas (+120)' : 'Belum Selesai';
-      badge.className = 'mission-pill' + (game.missionDone ? ' done' : '');
-    }
-
-    function updateSkillButton() {
-      const btn = document.getElementById('skillBtn');
-      if (game.skillCooldown > 0) {
-        btn.disabled = true;
-        btn.textContent = `📡 Radar Komunitas (Cooldown ${game.skillCooldown} langkah)`;
-      } else {
-        btn.disabled = false;
-        btn.textContent = '📡 Radar Komunitas (Siap)';
-      }
-    }
-
-    function useCommunitySkill() {
-      if (game.over || game.skillCooldown > 0) return;
-      game.skillCooldown = 8;
-      game.radarUsed += 1;
-      game.steps += 3;
-      game.energy = Math.min(100, game.energy + 10);
-      game.pingTargets.clear();
-
-      const allJoined = game.squad.length >= game.targetSquadSize;
-      if (!allJoined) {
-        Object.entries(game.items).forEach(([k, v]) => {
-          if (v.type === 'member') {
-            game.pingTargets.add(k);
-            if (game.fogMode) game.visited.add(k);
-          }
-        });
-      } else {
-        const ek = `${game.level.exit.x},${game.level.exit.y}`;
-        game.pingTargets.add(ek);
-        if (game.fogMode) game.visited.add(ek);
-      }
-
-      SoundFX.radar(game.level.levelNum, game.level.diffId);
-      showToast('📡 Radar aktif! +3 langkah & +10% energi', '#0284c7');
-      updateMissionUI();
-      updateSkillButton();
-      renderMaze();
-      updateHUD();
-    }
-
-    function renderMaze() {
-      const grid = document.getElementById('mazeGrid');
-      const map = game.level.map;
-      const size = map.length;
-      grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-      grid.innerHTML = '';
-      const allJoined = game.squad.length >= game.targetSquadSize;
-
-      for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
-          const cell = document.createElement('div');
-          const key = `${x},${y}`;
-          cell.className = 'cell ' + (map[y][x] === 1 ? 'wall' : 'path');
-          if (game.fogMode && !game.visited.has(key)) cell.classList.add('fog');
-          if (game.pingTargets.has(key)) cell.classList.add('radar-ping');
-
-          if (x === game.level.exit.x && y === game.level.exit.y) {
-            cell.classList.add(allJoined ? 'exit-open' : 'exit-locked');
-            cell.textContent = allJoined ? '🚪' : '🔒';
-          }
-
-          const item = game.items[key];
-          if (item && !(x === game.px && y === game.py)) {
-            if (item.type === 'member') cell.textContent = '🙋';
-            else if (item.type === 'gift') cell.textContent = '🎁';
-            else if (item.type === 'trap') cell.textContent = item.subtype === 'conflict' ? '🕳️' : '🔥';
-          }
-
-          if (x === game.px && y === game.py) {
-            cell.innerHTML = `<div style="width:88%;height:88%;">${createAvatarSVG(player.color, player.style, true)}</div>`;
-          }
-
-          grid.appendChild(cell);
-        }
-      }
-    }
-
-    function renderSquad() {
-      const list = document.getElementById('squadList');
-      list.innerHTML = game.squad.map(m => `
-        <div class="squad-member">
-          <div style="width:34px;height:38px;">${createAvatarSVG(m.color, m.style, m.isLeader)}</div>
-          <div class="m-name">${m.isLeader ? '👑 ' : ''}${m.name}</div>
-          <div class="m-perk">${m.perkTitle}</div>
-        </div>
-      `).join('');
-
-      const doorEl = document.getElementById('doorStatus');
-      if (game.squad.length >= game.targetSquadSize) {
-        doorEl.textContent = '🔓 Pintu Terbuka!';
-        doorEl.style.color = '#059669';
-      } else {
-        doorEl.textContent = `🔒 Kurang ${game.targetSquadSize - game.squad.length}`;
-        doorEl.style.color = '#d97706';
-      }
-    }
-
-    function showToast(text, bg = 'rgba(15, 23, 42, 0.92)') {
-      const wrap = document.getElementById('mazeWrapper');
-      const old = wrap.querySelector('.toast-pop');
-      if (old) old.remove();
-      const t = document.createElement('div');
-      t.className = 'toast-pop';
-      t.style.background = bg;
-      t.textContent = text;
-      wrap.appendChild(t);
-      setTimeout(() => t.remove(), 1300);
-    }
-
-    function movePlayer(dx, dy) {
-      if (game.over) return;
-      const nx = game.px + dx;
-      const ny = game.py + dy;
-      const map = game.level.map;
-      if (ny < 0 || ny >= map.length || nx < 0 || nx >= map.length || map[ny][nx] === 1) return;
-
-      game.px = nx;
-      game.py = ny;
-      game.steps -= 1;
-      if (game.skillCooldown > 0) {
-        game.skillCooldown -= 1;
-        updateSkillButton();
-      }
-
-      revealAround(nx, ny, game.visited, map.length);
-      const key = `${nx},${ny}`;
-      game.pingTargets.delete(key);
-      const item = game.items[key];
-
-      if (!item) {
-        SoundFX.step(game.level.levelNum, game.level.diffId);
-      } else if (item.type === 'member') {
-        delete game.items[key];
-        const perkMsg = item.npc.applyPerk(game);
-        game.squad.push({ ...item.npc, isLeader: false });
-        game.score += 100;
-        SoundFX.joinMember(game.level.levelNum, game.level.diffId);
-        showToast(`🙋 ${item.npc.name} bergabung! (${perkMsg})`, '#059669');
-        document.getElementById('logText').textContent = `${item.npc.name} bergabung dengan peran ${perkMsg}.`;
-        renderSquad();
-      } else if (item.type === 'gift') {
-        delete game.items[key];
-        game.giftsCollected += 1;
-        const mult = player.role === 'cheer' ? 2 : 1;
-        if (item.subtype === 'energy') {
-          const heal = 20 * mult;
-          game.energy = Math.min(100, game.energy + heal);
-          game.score += 50 * mult;
-          showToast(`🎁 +${heal}% Energi Tim!`, '#2563eb');
-        } else {
-          const bonus = 6 * mult;
-          game.steps += bonus;
-          game.score += 50 * mult;
-          showToast(`🎁 +${bonus} Langkah!`, '#2563eb');
-        }
-        SoundFX.gift(game.level.levelNum, game.level.diffId);
-      } else if (item.type === 'trap') {
-        delete game.items[key];
-        game.trapsHit += 1;
-        const resist = player.role === 'shield' ? 0.5 : 1;
-        if (item.subtype === 'conflict') {
-          const dmg = Math.round(28 * resist);
-          game.energy = Math.max(0, game.energy - dmg);
-          showToast(`🕳️ Konflik: -${dmg}% Energi`, '#dc2626');
-        } else {
-          const loss = Math.max(2, Math.round(5 * resist));
-          game.steps = Math.max(0, game.steps - loss);
-          showToast(`🔥 Rumor: -${loss} Langkah`, '#d97706');
-        }
-        SoundFX.trap(game.level.levelNum, game.level.diffId);
-      }
-
-      updateMissionUI();
-      renderMaze();
-      updateHUD();
-      checkEnd();
-    }
-
-    function updateHUD() {
-      document.getElementById('statMembers').textContent = `${game.squad.length} / ${game.targetSquadSize}`;
-      document.getElementById('statEnergy').textContent = `${game.energy}%`;
-      document.getElementById('statScore').textContent = game.score;
-      document.getElementById('statSteps').textContent = game.steps;
-    }
-
-    function checkEnd() {
-      const atExit = game.px === game.level.exit.x && game.py === game.level.exit.y;
-      const allJoined = game.squad.length >= game.targetSquadSize;
-
-      if (atExit && allJoined) {
-        game.over = true;
-        const finalScore = game.score + game.steps * 10 + game.energy;
-        const prev = saved.highscores[game.level.key] || 0;
-        if (finalScore > prev) {
-          saved.highscores[game.level.key] = finalScore;
-          saveState();
-          renderHighscores();
-        }
-        SoundFX.win(game.level.levelNum, game.level.diffId);
-        showResult(
-          true,
-          `🏆 ${game.level.label} Tuntas!`,
-          `Skor akhir ${finalScore} pts. Status mini misi: ${game.missionDone ? 'Tuntas (+120 poin)' : 'Belum tuntas'}.`,
-          saved.highscores[game.level.key]
-        );
-        return;
-      }
-
-      if (atExit && !allJoined) {
-        showToast('🔒 Ajak semua anggota dulu sebelum masuk markas!', '#d97706');
-      }
-
-      if (game.energy <= 0 || game.steps <= 0) {
-        game.over = true;
-        SoundFX.lose(game.level.levelNum, game.level.diffId);
-        showResult(
-          false,
-          game.energy <= 0 ? '💔 Energi Tim Habis' : '⏳ Sisa Langkah Habis',
-          `Coba lagi di ${game.level.label} dengan memanfaatkan peran anggota baru dan Radar Komunitas.`,
-          saved.highscores[game.level.key] || 0
-        );
-      }
-    }
-
-    function showResult(isWin, title, desc, bestScore) {
-      document.getElementById('resultEmoji').textContent = isWin ? '🎉' : '🧭';
-      document.getElementById('resultTitle').textContent = title;
-      document.getElementById('resultDesc').textContent = desc;
-      document.getElementById('recordPill').textContent = `🏅 Rekor ${game.level.label}: ${bestScore} pts`;
-
-      const nextBtn = document.getElementById('nextLevelBtn');
-      if (isWin && selectedLevelNum < 10) {
-        nextBtn.style.display = 'inline-block';
-        nextBtn.textContent = `Lanjut Level ${selectedLevelNum + 1} ➡️`;
-        nextBtn.onclick = () => startGame(selectedDiffId, selectedLevelNum + 1);
-      } else if (!isWin) {
-        nextBtn.style.display = 'inline-block';
-        nextBtn.textContent = `Ulangi Level ${selectedLevelNum} 🔁`;
-        nextBtn.onclick = () => startGame(selectedDiffId, selectedLevelNum);
-      } else {
-        nextBtn.style.display = 'none';
-      }
-
-      setTimeout(() => switchScreen('resultScreen'), 350);
-    }
-
-    function resetToSetup() {
-      game.over = true;
-      renderHighscores();
-      document.getElementById('headerBadge').textContent = 'Kustom Karakter & Pilih Level 1–10';
-      switchScreen('setupScreen');
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (!document.getElementById('gameScreen').classList.contains('active')) return;
-      const k = e.key.toLowerCase();
-      if (k === 'arrowup' || k === 'w') { e.preventDefault(); movePlayer(0, -1); }
-      if (k === 'arrowdown' || k === 's') { e.preventDefault(); movePlayer(0, 1); }
-      if (k === 'arrowleft' || k === 'a') { e.preventDefault(); movePlayer(-1, 0); }
-      if (k === 'arrowright' || k === 'd') { e.preventDefault(); movePlayer(1, 0); }
-    });
-
-    initSetupUI();
+    buildSetupPage();
   </script>
 </body>
 </html>
