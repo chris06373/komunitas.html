@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Arena Ekspedisi — Labirin Komunitas</title>
+  <style>
+    :root {
+      --bg-dark: #0b1120;
+      --panel: #111827;
+      --panel-soft: #1e293b;
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --emerald: #10b981;
+      --cyan: #38bdf8;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --border: #283548;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.14), transparent 35%),
+        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.14), transparent 35%),
+        var(--bg-dark);
+      color: var(--ink);
+      padding: 20px 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .arena-shell {
+      width: 100%;
+      max-width: 1060px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    .arena-head {
+      background: var(--panel-soft);
+      border-bottom: 1px solid var(--border);
+      padding: 15px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .arena-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .head-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .lvl-tag {
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .ghost-btn {
+      background: var(--panel);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .ghost-btn:hover {
+      border-color: var(--cyan);
+    }
+
+    .view-pane {
+      display: none;
+      padding: 22px;
+    }
+
+    .view-pane.active {
+      display: block;
+    }
+
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .metrics-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .metric-box {
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .quest-strip {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .quest-status {
+      background: rgba(245, 158, 11, 0.22);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      white-space: nowrap;
+    }
+
+    .quest-status.done {
+      background: rgba(16, 185, 129, 0.25);
+      color: #6ee7b7;
+    }
+
+    .play-grid {
+      display: grid;
+      grid-template-columns: 1.32fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      .play-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .board-frame {
+      background: #070b14;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+    }
+
+    .board-grid {
+      display: grid;
+      gap: 2px;
+      width: 100%;
+      max-width: 450px;
+      aspect-ratio: 1 / 1;
+    }
+
+    .tile {
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    .tile.fog {
+      opacity: 0.14;
+      filter: blur(1px);
+    }
+
+    .tile.ping {
+      outline: 2px solid var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+      z-index: 3;
+    }
+
+    .tile.wall {
+      background: #1e293b;
+    }
+
+    .tile.floor {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .tile.gate-locked {
+      background: #94a3b8;
+      opacity: 0.72;
+    }
+
+    .tile.gate-open {
+      background: #fde047;
+    }
+
+    .side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .party-card {
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      min-height: 146px;
+    }
+
+    .party-roster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .party-member {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px 8px;
+      width: 78px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .party-member .who {
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .party-member .perk {
+      font-size: 0.63rem;
+      color: #6ee7b7;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+
+    .radar-action {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--cyan);
+      background: rgba(56, 189, 248, 0.12);
+      color: #7dd3fc;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .radar-action:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      border-color: var(--border);
+      color: var(--muted);
+      background: var(--panel-soft);
+    }
+
+    .key-legend {
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.77rem;
+      color: #cbd5e1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .pad-keys {
+      display: grid;
+      grid-template-columns: repeat(3, 52px);
+      grid-template-rows: repeat(2, 46px);
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .pad-keys button {
+      background: var(--panel-soft);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .pad-keys button:hover {
+      border-color: var(--emerald);
+    }
+
+    .pad-keys .k-up { grid-column: 2; grid-row: 1; }
+    .pad-keys .k-left { grid-column: 1; grid-row: 2; }
+    .pad-keys .k-down { grid-column: 2; grid-row: 2; }
+    .pad-keys .k-right { grid-column: 3; grid-row: 2; }
+
+    .toast-pill {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      z-index: 20;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .status-bar {
+      margin-top: 12px;
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .summary-card {
+      text-align: center;
+      padding: 32px 16px;
+    }
+
+    .best-badge {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      color: #fcd34d;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin: 14px 0 20px;
+    }
+
+    .cta-emerald {
+      background: var(--emerald);
+      color: #052e16;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-size: 0.94rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .cta-emerald:hover {
+      background: #34d399;
+    }
+  </style>
+</head>
+<body>
+  <div class="arena-shell">
+    <header class="arena-head">
+      <div class="arena-title">
+        <span>🗺️</span>
+        <span>Arena Labirin Komunitas</span>
+      </div>
+      <div class="head-actions">
+        <button class="ghost-btn" id="audioToggle" type="button">🔊 Suara: ON</button>
+        <span class="lvl-tag" id="stageTag">Level 1</span>
+        <a class="ghost-btn" href="index.html">← Ubah Karakter</a>
+      </div>
+    </header>
+
+    <section class="view-pane active" id="playPane">
+      <div class="metrics-bar">
+        <div class="metric-box">
+          <div class="metric-label">👥 Anggota Barisan</div>
+          <div class="metric-val" id="mSquad">1 / 4</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">❤️ Energi Tim</div>
+          <div class="metric-val" id="mEnergy">100%</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">🎁 Poin</div>
+          <div class="metric-val" id="mScore">0</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">👣 Sisa Langkah</div>
+          <div class="metric-val" id="mSteps">40</div>
+        </div>
+      </div>
+
+      <div class="quest-strip">
+        <span id="questDesc">🎯 Mini Misi: ...</span>
+        <span class="quest-status" id="questBadge">Belum Selesai</span>
+      </div>
+
+      <div class="play-grid">
+        <div class="board-frame" id="boardFrame">
+          <div class="board-grid" id="boardGrid"></div>
+        </div>
+
+        <div class="side-col">
+          <div class="party-card">
+            <div style="display:flex; justify-content:space-between; font-size:0.84rem; font-weight:700;">
+              <span>🌱 Barisan Komunitas</span>
+              <span id="gateState" style="color:var(--amber);">🔒 Pintu Terkunci</span>
+            </div>
+            <div class="party-roster" id="partyRoster"></div>
+          </div>
+
+          <button class="radar-action" id="radarBtn" type="button">
+            📡 Radar Komunitas (Siap)
+          </button>
+
+          <div class="key-legend">
+            <div>🙋 <span>Anggota Berperan</span></div>
+            <div>🎁 <span>Hadiah (+Energi/Langkah)</span></div>
+            <div>🕳️ <span>Konflik (-Energi)</span></div>
+            <div>🔥 <span>Rumor (-Langkah)</span></div>
+            <div>🚪 <span>Pintu Markas</span></div>
+            <div>⌨️ <span>Arrow / WASD</span></div>
+          </div>
+
+          <div class="pad-keys">
+            <button class="k-up" type="button" data-dx="0" data-dy="-1">⬆️</button>
+            <button class="k-left" type="button" data-dx="-1" data-dy="0">⬅️</button>
+            <button class="k-down" type="button" data-dx="0" data-dy="1">⬇️</button>
+            <button class="k-right" type="button" data-dx="1" data-dy="0">➡️</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <span id="eventLog">Ajak semua anggota, selesaikan mini misi, lalu buka pintu markas!</span>
+        <button class="ghost-btn" id="restartBtn" type="button">Acak Ulang Level</button>
+      </div>
+    </section>
+
+    <section class="view-pane" id="summaryPane">
+      <div class="summary-card">
+        <div id="sumIcon" style="font-size: 3.5rem;">🏆</div>
+        <h2 id="sumHeading" style="margin-top: 8px;">Level Selesai!</h2>
+        <p id="sumText" style="color: var(--muted); max-width: 520px; margin: 10px auto 0;"></p>
+        <div class="best-badge" id="sumRecord">🏅 Rekor Level: 0 pts</div>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="cta-emerald" id="advanceBtn" type="button">Level Berikutnya →</button>
+          <a class="ghost-btn" style="padding:12px 18px; border-radius:14px;" href="index.html">Kembali ke Studio</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const HUB_KEY = 'komunitas_hub_state_v1';
+
+    const DIFF_SPECS = [
+      { id: 'easy', label: '🌱 Mudah', gridStart: 9, crewStart: 2, stepsStart: 36, hazardFactor: 0.7, braid: 0.16 },
+      { id: 'medium', label: '🔥 Agak Sulit', gridStart: 11, crewStart: 3, stepsStart: 50, hazardFactor: 1.0, braid: 0.11 },
+      { id: 'hard', label: '⚡ Sulit', gridStart: 13, crewStart: 4, stepsStart: 68, hazardFactor: 1.35, braid: 0.07 }
+    ];
+
+    const ALLY_POOL = [
+      {
+        name: 'Budi', color: '#3b82f6', hair: 'short',
+        perk: 'Logistik (+5 Lkh)',
+        grant: (st) => { st.steps += 5; return 'Logistik: +5 langkah'; }
+      },
+      {
+        name: 'Siti', color: '#ec4899', hair: 'glasses',
+        perk: 'Konselor (+15% En)',
+        grant: (st) => { st.energy = Math.min(100, st.energy + 15); return 'Konselor: +15% energi'; }
+      },
+      {
+        name: 'Raka', color: '#f59e0b', hair: 'cap',
+        perk: 'Kurator (+80 Poin)',
+        grant: (st) => { st.score += 80; return 'Kurator: +80 poin'; }
+      },
+      {
+        name: 'Ayu', color: '#8b5cf6', hair: 'curly',
+        perk: 'Radar (-2 CD)',
+        grant: (st) => { st.cooldown = Math.max(0, st.cooldown - 2); return 'Koordinator: cooldown radar -2'; }
+      },
+      {
+        name: 'Dina', color: '#14b8a6', hair: 'short',
+        perk: 'Navigator (+6 Lkh)',
+        grant: (st) => { st.steps += 6; return 'Navigator: +6 langkah'; }
+      },
+      {
+        name: 'Fajar', color: '#ef4444', hair: 'glasses',
+        perk: 'Mediator (+20% En)',
+        grant: (st) => { st.energy = Math.min(100, st.energy + 20); return 'Mediator: +20% energi'; }
+      }
+    ];
+
+    const LEVEL_QUESTS = [
+      { text: 'Ajak seluruh calon anggota di level ini', pass: (st) => st.party.length >= st.goalParty },
+      { text: 'Ambil minimal 2 kotak hadiah 🎁', pass: (st) => st.giftsTaken >= 2 },
+      { text: 'Selesaikan tanpa terkena jebakan apa pun', pass: (st) => st.hazardsHit === 0 },
+      { text: 'Aktifkan Radar Komunitas minimal 1 kali', pass: (st) => st.radarsFired >= 1 },
+      { text: 'Pertahankan energi tim minimal 80%', pass: (st) => st.energy >= 80 },
+      { text: 'Kumpulkan minimal 250 poin', pass: (st) => st.score >= 250 },
+      { text: 'Capai pintu markas dengan sisa ≥ 10 langkah', pass: (st) => st.steps >= 10 },
+      { text: 'Ambil minimal 3 kotak hadiah 🎁', pass: (st) => st.giftsTaken >= 3 },
+      { text: 'Capai pintu markas dengan energi ≥ 90%', pass: (st) => st.energy >= 90 },
+      { text: 'Ajak semua anggota, ≥ 2 hadiah, & ≤ 1 jebakan', pass: (st) => st.party.length >= st.goalParty && st.giftsTaken >= 2 && st.hazardsHit <= 1 }
+    ];
+
+    const SynthAudio = (() => {
+      let audioCtx = null;
+      let active = true;
+
+      function context() {
+        if (!active) return null;
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      }
+
+      function playNote(freq, dur = 0.08, wave = 'sine', offset = 0, vol = 0.08) {
+        const c = context();
+        if (!c) return;
+        const t0 = c.currentTime + offset;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = wave;
+        osc.frequency.setValueAtTime(freq, t0);
+        gain.gain.setValueAtTime(vol, t0);
+        gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.01);
+      }
+
+      function scaleForStage(lvl, diff) {
+        const diffRatio = diff === 'easy' ? 1.0 : diff === 'medium' ? 1.06 : 1.12;
+        return (1 + (lvl - 1) * 0.025) * diffRatio;
+      }
+
+      return {
+        setActive(v) { active = v; },
+        isActive() { return active; },
+        footstep(lvl, diff) {
+          playNote(260 * scaleForStage(lvl, diff), 0.04, 'triangle', 0, 0.04);
+        },
+        recruit(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          playNote(440 * s, 0.09, 'sine', 0, 0.09);
+          playNote(554 * s, 0.09, 'sine', 0.08, 0.09);
+          playNote(659 * s, 0.14, 'triangle', 0.16, 0.1);
+        },
+        reward(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          playNote(523 * s, 0.08, 'sine', 0, 0.08);
+          playNote(784 * s, 0.12, 'sine', 0.07, 0.08);
+        },
+        hazard(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          playNote(210 * s, 0.11, 'sawtooth', 0, 0.08);
+          playNote(145 * s, 0.16, 'sawtooth', 0.09, 0.08);
+        },
+        scan(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          playNote(600 * s, 0.07, 'sine', 0, 0.07);
+          playNote(900 * s, 0.1, 'sine', 0.06, 0.07);
+        },
+        questClear(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          playNote(587 * s, 0.08, 'triangle', 0, 0.09);
+          playNote(880 * s, 0.15, 'triangle', 0.08, 0.09);
+        },
+        victory(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          [523, 659, 784, 1046].forEach((f, i) => playNote(f * s, 0.14, 'triangle', i * 0.1, 0.1));
+        },
+        defeat(lvl, diff) {
+          const s = scaleForStage(lvl, diff);
+          [330, 277, 220].forEach((f, i) => playNote(f * s, 0.16, 'sawtooth', i * 0.12, 0.07));
+        }
+      };
+    })();
+
+    function loadSharedHub() {
+      const defaults = {
+        profile: { name: 'Nara', color: '#15803d', hair: 'short', role: 'scout' },
+        diff: 'easy',
+        level: 1,
+        fog: false,
+        sound: true,
+        records: {}
+      };
+      try {
+        const parsed = JSON.parse(localStorage.getItem(HUB_KEY));
+        return {
+          ...defaults,
+          ...(parsed || {}),
+          profile: { ...defaults.profile, ...((parsed && parsed.profile) || {}) },
+          records: (parsed && parsed.records) || {}
+        };
+      } catch {
+        return defaults;
+      }
+    }
+
+    function saveSharedHub() {
+      try {
+        localStorage.setItem(HUB_KEY, JSON.stringify(hub));
+      } catch {}
+    }
+
+    const hub = loadSharedHub();
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramDiff = urlParams.get('diff');
+    const paramLevel = parseInt(urlParams.get('level') || '', 10);
+
+    let activeDiffId = DIFF_SPECS.some(d => d.id === paramDiff) ? paramDiff : hub.diff;
+    let activeLevelNum = (!Number.isNaN(paramLevel) && paramLevel >= 1 && paramLevel <= 10)
+      ? paramLevel
+      : (hub.level || 1);
+
+    SynthAudio.setActive(hub.sound !== false);
+
+    function renderCharacterSvg(color, hair, isCaptain = false) {
+      let top = `<path d="M31 28 Q50 12 69 28 Z" fill="#1e293b"/>`;
+      if (hair === 'curly') {
+        top = `<circle cx="32" cy="24" r="9" fill="#1e293b"/><circle cx="50" cy="20" r="10" fill="#1e293b"/><circle cx="68" cy="24" r="9" fill="#1e293b"/>`;
+      } else if (hair === 'cap') {
+        top = `<path d="M30 28 Q50 10 70 28 Z" fill="#f59e0b"/><rect x="48" y="24" width="28" height="5" rx="2.5" fill="#d97706"/>`;
+      } else if (hair === 'glasses') {
+        top = `<path d="M32 26 Q50 14 68 26 Z" fill="#1e293b"/><circle cx="42" cy="38" r="6" fill="none" stroke="#0f172a" stroke-width="2.5"/><circle cx="58" cy="38" r="6" fill="none" stroke="#0f172a" stroke-width="2.5"/><line x1="48" y1="38" x2="52" y2="38" stroke="#0f172a" stroke-width="2.5"/>`;
+      }
+      const crown = isCaptain ? `<polygon points="42,12 46,5 50,11 54,5 58,12" fill="#facc15"/>` : '';
+      return `
+        <svg viewBox="0 0 100 110" width="100%" height="100%">
+          <path d="M26 95 C26 68, 74 68, 74 95 Z" fill="${color}" />
+          <circle cx="50" cy="38" r="19" fill="#fde68a" />
+          <circle cx="43" cy="38" r="2.3" fill="#1e293b" />
+          <circle cx="57" cy="38" r="2.3" fill="#1e293b" />
+          <path d="M44 45 Q50 51 56 45" fill="none" stroke="#1e293b" stroke-width="2.3" stroke-linecap="round"/>
+          ${top}${crown}
+        </svg>
+      `;
+    }
+
+    function buildMazeLayout(desiredSize, extraLoopChance) {
+      const n = desiredSize % 2 === 0 ? desiredSize + 1 : desiredSize;
+      const cells = Array.from({ length: n }, () => Array(n).fill(1));
+      const jumps = [[0, -2], [2, 0], [0, 2], [-2, 0]];
+
+      const randomize = (arr) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      };
+
+      const dig = (x, y) => {
+        cells[y][x] = 0;
+        for (const [dx, dy] of randomize([...jumps])) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx > 0 && nx < n - 1 && ny > 0 && ny < n - 1 && cells[ny][nx] === 1) {
+            cells[y + dy / 2][x + dx / 2] = 0;
+            dig(nx, ny);
+          }
+        }
+      };
+
+      dig(1, 1);
+
+      for (let y = 1; y < n - 1; y++) {
+        for (let x = 1; x < n - 1; x++) {
+          if (cells[y][x] === 1 && Math.random() < extraLoopChance) {
+            const openH = cells[y][x - 1] === 0 && cells[y][x + 1] === 0;
+            const openV = cells[y - 1][x] === 0 && cells[y + 1][x] === 0;
+            if (openH || openV) cells[y][x] = 0;
+          }
+        }
+      }
+
+      cells[1][1] = 0;
+      cells[n - 2][n - 2] = 0;
+      return { cells, origin: { x: 1, y: 1 }, goal: { x: n - 2, y: n - 2 } };
+    }
+
+    function createStageSpec(diffId, levelNum) {
+      const spec = DIFF_SPECS.find(d => d.id === diffId) || DIFF_SPECS[0];
+      const size = Math.min(19, spec.gridStart + Math.floor((levelNum - 1) / 2) * 2);
+      const alliesCount = Math.min(5, spec.crewStart + Math.floor(levelNum / 4));
+      const giftsCount = Math.max(3, 2 + Math.floor(levelNum / 3));
+      const hazardsCount = Math.max(2, Math.round((1 + levelNum * 0.65) * spec.hazardFactor));
+      const budgetSteps = spec.stepsStart + (levelNum - 1) * 4 + (size - spec.gridStart) * 2;
+      const quest = LEVEL_QUESTS[(levelNum - 1) % LEVEL_QUESTS.length];
+      const layout = buildMazeLayout(size, spec.braid);
+
+      return {
+        recordKey: `${spec.label} — Lv.${levelNum}`,
+        diffId: spec.id,
+        diffLabel: spec.label,
+        levelNum,
+        budgetSteps,
+        alliesCount,
+        giftsCount,
+        hazardsCount,
+        quest,
+        ...layout
+      };
+    }
+
+    let st = {};
+
+    function setViewPane(id) {
+      document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function uncoverAround(x, y, seenSet, dim) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < dim && ny >= 0 && ny < dim) {
+            seenSet.add(`${nx},${ny}`);
+          }
+        }
+      }
+    }
+
+    function initStage(diffId, levelNum) {
+      activeDiffId = diffId;
+      activeLevelNum = levelNum;
+      hub.diff = diffId;
+      hub.level = levelNum;
+      saveSharedHub();
+
+      const stage = createStageSpec(diffId, levelNum);
+      const dim = stage.cells.length;
+      const freeTiles = [];
+
+      for (let y = 0; y < dim; y++) {
+        for (let x = 0; x < dim; x++) {
+          const isStart = x === stage.origin.x && y === stage.origin.y;
+          const isGoal = x === stage.goal.x && y === stage.goal.y;
+          if (stage.cells[y][x] === 0 && !isStart && !isGoal) {
+            freeTiles.push({ x, y });
+          }
+        }
+      }
+      freeTiles.sort(() => Math.random() - 0.5);
+
+      const entities = {};
+      let ptr = 0;
+
+      for (let i = 0; i < stage.alliesCount && ptr < freeTiles.length; i++, ptr++) {
+        const pt = freeTiles[ptr];
+        const ally = ALLY_POOL[(i + levelNum - 1) % ALLY_POOL.length];
+        entities[`${pt.x},${pt.y}`] = { kind: 'ally', ally };
+      }
+
+      for (let i = 0; i < stage.giftsCount && ptr < freeTiles.length; i++, ptr++) {
+        const pt = freeTiles[ptr];
+        entities[`${pt.x},${pt.y}`] = { kind: 'gift', variant: i % 2 === 0 ? 'energy' : 'steps' };
+      }
+
+      for (let i = 0; i < stage.hazardsCount && ptr < freeTiles.length; i++, ptr++) {
+        const pt = freeTiles[ptr];
+        entities[`${pt.x},${pt.y}`] = { kind: 'hazard', variant: i % 2 === 0 ? 'conflict' : 'rumor' };
+      }
+
+      const seen = new Set();
+      uncoverAround(stage.origin.x, stage.origin.y, seen, dim);
+
+      const leader = hub.profile;
+      st = {
+        stage,
+        px: stage.origin.x,
+        py: stage.origin.y,
+        energy: 100,
+        steps: stage.budgetSteps + (leader.role === 'scout' ? 8 : 0),
+        score: 0,
+        entities,
+        party: [{
+          name: leader.name,
+          color: leader.color,
+          hair: leader.hair,
+          perk: 'Pemimpin',
+          isCaptain: true
+        }],
+        goalParty: stage.alliesCount + 1,
+        fogActive: Boolean(hub.fog),
+        seen,
+        cooldown: 0,
+        pinged: new Set(),
+        giftsTaken: 0,
+        hazardsHit: 0,
+        radarsFired: 0,
+        questDone: false,
+        ended: false
+      };
+
+      document.getElementById('stageTag').textContent = `${stage.diffLabel} • Lv.${levelNum} (${dim}×${dim})`;
+      document.getElementById('eventLog').textContent = 'Ajak semua anggota, selesaikan mini misi, lalu buka pintu markas!';
+      syncQuest();
+      syncRadarButton();
+      drawBoard();
+      drawParty();
+      syncMetrics();
+      setViewPane('playPane');
+    }
+
+    function syncQuest() {
+      const q = st.stage.quest;
+      const met = q.pass(st);
+      if (met && !st.questDone) {
+        st.questDone = true;
+        st.score += 120;
+        SynthAudio.questClear(st.stage.levelNum, st.stage.diffId);
+        popupNotice('🎯 Mini Misi Selesai! +120 Poin', '#059669');
+      }
+      document.getElementById('questDesc').textContent = `🎯 Mini Misi Lv.${st.stage.levelNum}: ${q.text}`;
+      const badge = document.getElementById('questBadge');
+      badge.textContent = st.questDone ? '✓ Tuntas (+120)' : 'Belum Selesai';
+      badge.className = 'quest-status' + (st.questDone ? ' done' : '');
+    }
+
+    function syncRadarButton() {
+      const btn = document.getElementById('radarBtn');
+      if (st.cooldown > 0) {
+        btn.disabled = true;
+        btn.textContent = `📡 Radar Komunitas (Cooldown ${st.cooldown} langkah)`;
+      } else {
+        btn.disabled = false;
+        btn.textContent = '📡 Radar Komunitas (Siap)';
+      }
+    }
+
+    function triggerRadar() {
+      if (st.ended || st.cooldown > 0) return;
+      st.cooldown = 8;
+      st.radarsFired += 1;
+      st.steps += 3;
+      st.energy = Math.min(100, st.energy + 10);
+      st.pinged.clear();
+
+      if (st.party.length < st.goalParty) {
+        Object.entries(st.entities).forEach(([coord, obj]) => {
+          if (obj.kind === 'ally') {
+            st.pinged.add(coord);
+            if (st.fogActive) st.seen.add(coord);
+          }
+        });
+      } else {
+        const goalCoord = `${st.stage.goal.x},${st.stage.goal.y}`;
+        st.pinged.add(goalCoord);
+        if (st.fogActive) st.seen.add(goalCoord);
+      }
+
+      SynthAudio.scan(st.stage.levelNum, st.stage.diffId);
+      popupNotice('📡 Radar aktif! +3 langkah & +10% energi', '#0284c7');
+      syncQuest();
+      syncRadarButton();
+      drawBoard();
+      syncMetrics();
+    }
+
+    function drawBoard() {
+      const gridEl = document.getElementById('boardGrid');
+      const cells = st.stage.cells;
+      const dim = cells.length;
+      gridEl.style.gridTemplateColumns = `repeat(${dim}, 1fr)`;
+      gridEl.innerHTML = '';
+
+      const unlocked = st.party.length >= st.goalParty;
+      const leader = hub.profile;
+
+      for (let y = 0; y < dim; y++) {
+        for (let x = 0; x < dim; x++) {
+          const tile = document.createElement('div');
+          const coord = `${x},${y}`;
+          tile.className = 'tile ' + (cells[y][x] === 1 ? 'wall' : 'floor');
+          if (st.fogActive && !st.seen.has(coord)) tile.classList.add('fog');
+          if (st.pinged.has(coord)) tile.classList.add('ping');
+
+          if (x === st.stage.goal.x && y === st.stage.goal.y) {
+            tile.classList.add(unlocked ? 'gate-open' : 'gate-locked');
+            tile.textContent = unlocked ? '🚪' : '🔒';
+          }
+
+          const ent = st.entities[coord];
+          if (ent && !(x === st.px && y === st.py)) {
+            if (ent.kind === 'ally') tile.textContent = '🙋';
+            else if (ent.kind === 'gift') tile.textContent = '🎁';
+            else if (ent.kind === 'hazard') tile.textContent = ent.variant === 'conflict' ? '🕳️' : '🔥';
+          }
+
+          if (x === st.px && y === st.py) {
+            tile.innerHTML = `<div style="width:88%;height:88%;">${renderCharacterSvg(leader.color, leader.hair, true)}</div>`;
+          }
+
+          gridEl.appendChild(tile);
+        }
+      }
+    }
+
+    function drawParty() {
+      const roster = document.getElementById('partyRoster');
+      roster.innerHTML = st.party.map(m => `
+        <div class="party-member">
+          <div style="width:34px;height:38px;">${renderCharacterSvg(m.color, m.hair, m.isCaptain)}</div>
+          <div class="who">${m.isCaptain ? '👑 ' : ''}${m.name}</div>
+          <div class="perk">${m.perk}</div>
+        </div>
+      `).join('');
+
+      const gate = document.getElementById('gateState');
+      if (st.party.length >= st.goalParty) {
+        gate.textContent = '🔓 Pintu Terbuka!';
+        gate.style.color = '#6ee7b7';
+      } else {
+        gate.textContent = `🔒 Kurang ${st.goalParty - st.party.length}`;
+        gate.style.color = '#fbbf24';
+      }
+    }
+
+    function popupNotice(msg, bg = '#0f172a') {
+      const frame = document.getElementById('boardFrame');
+      const existing = frame.querySelector('.toast-pill');
+      if (existing) existing.remove();
+      const pill = document.createElement('div');
+      pill.className = 'toast-pill';
+      pill.style.background = bg;
+      pill.textContent = msg;
+      frame.appendChild(pill);
+      setTimeout(() => pill.remove(), 1300);
+    }
+
+    function stepHero(dx, dy) {
+      if (st.ended) return;
+      const nx = st.px + dx;
+      const ny = st.py + dy;
+      const cells = st.stage.cells;
+      if (ny < 0 || ny >= cells.length || nx < 0 || nx >= cells.length || cells[ny][nx] === 1) return;
+
+      st.px = nx;
+      st.py = ny;
+      st.steps -= 1;
+      if (st.cooldown > 0) {
+        st.cooldown -= 1;
+        syncRadarButton();
+      }
+
+      uncoverAround(nx, ny, st.seen, cells.length);
+      const coord = `${nx},${ny}`;
+      st.pinged.delete(coord);
+      const ent = st.entities[coord];
+      const role = hub.profile.role;
+
+      if (!ent) {
+        SynthAudio.footstep(st.stage.levelNum, st.stage.diffId);
+      } else if (ent.kind === 'ally') {
+        delete st.entities[coord];
+        const info = ent.ally.grant(st);
+        st.party.push({ ...ent.ally, isCaptain: false });
+        st.score += 100;
+        SynthAudio.recruit(st.stage.levelNum, st.stage.diffId);
+        popupNotice(`🙋 ${ent.ally.name} bergabung! (${info})`, '#059669');
+        document.getElementById('eventLog').textContent = `${ent.ally.name} bergabung dengan peran ${info}.`;
+        drawParty();
+      } else if (ent.kind === 'gift') {
+        delete st.entities[coord];
+        st.giftsTaken += 1;
+        const factor = role === 'cheer' ? 2 : 1;
+        if (ent.variant === 'energy') {
+          const addEn = 20 * factor;
+          st.energy = Math.min(100, st.energy + addEn);
+          st.score += 50 * factor;
+          popupNotice(`🎁 +${addEn}% Energi Tim!`, '#2563eb');
+        } else {
+          const addSt = 6 * factor;
+          st.steps += addSt;
+          st.score += 50 * factor;
+          popupNotice(`🎁 +${addSt} Langkah!`, '#2563eb');
+        }
+        SynthAudio.reward(st.stage.levelNum, st.stage.diffId);
+      } else if (ent.kind === 'hazard') {
+        delete st.entities[coord];
+        st.hazardsHit += 1;
+        const damp = role === 'shield' ? 0.5 : 1;
+        if (ent.variant === 'conflict') {
+          const dropEn = Math.round(28 * damp);
+          st.energy = Math.max(0, st.energy - dropEn);
+          popupNotice(`🕳️ Konflik: -${dropEn}% Energi`, '#dc2626');
+        } else {
+          const dropSt = Math.max(2, Math.round(5 * damp));
+          st.steps = Math.max(0, st.steps - dropSt);
+          popupNotice(`🔥 Rumor: -${dropSt} Langkah`, '#d97706');
+        }
+        SynthAudio.hazard(st.stage.levelNum, st.stage.diffId);
+      }
+
+      syncQuest();
+      drawBoard();
+      syncMetrics();
+      evaluateOutcome();
+    }
+
+    function syncMetrics() {
+      document.getElementById('mSquad').textContent = `${st.party.length} / ${st.goalParty}`;
+      document.getElementById('mEnergy').textContent = `${st.energy}%`;
+      document.getElementById('mScore').textContent = st.score;
+      document.getElementById('mSteps').textContent = st.steps;
+    }
+
+    function evaluateOutcome() {
+      const reachedGoal = st.px === st.stage.goal.x && st.py === st.stage.goal.y;
+      const unlocked = st.party.length >= st.goalParty;
+
+      if (reachedGoal && unlocked) {
+        st.ended = true;
+        const total = st.score + st.steps * 10 + st.energy;
+        const priorBest = hub.records[st.stage.recordKey] || 0;
+        if (total > priorBest) {
+          hub.records[st.stage.recordKey] = total;
+          saveSharedHub();
+        }
+        SynthAudio.victory(st.stage.levelNum, st.stage.diffId);
+        presentSummary(
+          true,
+          `🏆 ${st.stage.recordKey} Tuntas!`,
+          `Skor akhir ${total} pts. Mini misi: ${st.questDone ? 'Tuntas (+120 poin)' : 'Belum tuntas'}.`,
+          hub.records[st.stage.recordKey]
+        );
+        return;
+      }
+
+      if (reachedGoal && !unlocked) {
+        popupNotice('🔒 Ajak semua anggota dulu sebelum masuk markas!', '#d97706');
+      }
+
+      if (st.energy <= 0 || st.steps <= 0) {
+        st.ended = true;
+        SynthAudio.defeat(st.stage.levelNum, st.stage.diffId);
+        presentSummary(
+          false,
+          st.energy <= 0 ? '💔 Energi Tim Habis' : '⏳ Sisa Langkah Habis',
+          `Coba lagi di ${st.stage.recordKey} dengan peran anggota baru dan Radar Komunitas.`,
+          hub.records[st.stage.recordKey] || 0
+        );
+      }
+    }
+
+    function presentSummary(won, heading, desc, bestPts) {
+      document.getElementById('sumIcon').textContent = won ? '🎉' : '🧭';
+      document.getElementById('sumHeading').textContent = heading;
+      document.getElementById('sumText').textContent = desc;
+      document.getElementById('sumRecord').textContent = `🏅 Rekor ${st.stage.recordKey}: ${bestPts} pts`;
+
+      const advBtn = document.getElementById('advanceBtn');
+      if (won && activeLevelNum < 10) {
+        advBtn.style.display = 'inline-block';
+        advBtn.textContent = `Lanjut Level ${activeLevelNum + 1} →`;
+        advBtn.onclick = () => initStage(activeDiffId, activeLevelNum + 1);
+      } else if (!won) {
+        advBtn.style.display = 'inline-block';
+        advBtn.textContent = `Ulangi Level ${activeLevelNum} ↻`;
+        advBtn.onclick = () => initStage(activeDiffId, activeLevelNum);
+      } else {
+        advBtn.style.display = 'none';
+      }
+
+      setTimeout(() => setViewPane('summaryPane'), 350);
+    }
+
+    document.getElementById('radarBtn').addEventListener('click', triggerRadar);
+    document.getElementById('restartBtn').addEventListener('click', () => initStage(activeDiffId, activeLevelNum));
+
+    const audioBtn = document.getElementById('audioToggle');
+    const syncAudioLabel = () => {
+      audioBtn.textContent = SynthAudio.isActive() ? '🔊 Suara: ON' : '🔇 Suara: OFF';
+    };
+    syncAudioLabel();
+    audioBtn.addEventListener('click', () => {
+      const next = !SynthAudio.isActive();
+      SynthAudio.setActive(next);
+      hub.sound = next;
+      saveSharedHub();
+      syncAudioLabel();
+    });
+
+    document.querySelectorAll('.pad-keys button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        stepHero(parseInt(btn.dataset.dx, 10), parseInt(btn.dataset.dy, 10));
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (!document.getElementById('playPane').classList.contains('active')) return;
+      const key = e.key.toLowerCase();
+      if (key === 'arrowup' || key === 'w') { e.preventDefault(); stepHero(0, -1); }
+      if (key === 'arrowdown' || key === 's') { e.preventDefault(); stepHero(0, 1); }
+      if (key === 'arrowleft' || key === 'a') { e.preventDefault(); stepHero(-1, 0); }
+      if (key === 'arrowright' || key === 'd') { e.preventDefault(); stepHero(1, 0); }
+    });
+
+    initStage(activeDiffId, activeLevelNum);
+  </script>
+</body>
+</html>
